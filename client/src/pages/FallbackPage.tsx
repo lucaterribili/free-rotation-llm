@@ -187,6 +187,7 @@ export default function FallbackPage() {
       keySelectionStrategy?: KeySelectionStrategy; cooldownCeilingMs?: number | null
       stickySessions?: StickySessionsMode
       decisionModel?: string; decisionMinProbability?: number
+      resetChainStrategy?: boolean
     }) =>
       apiFetch('/api/fallback/routing', { method: 'PUT', body: JSON.stringify(payload) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['fallback', 'routing'] }),
@@ -365,7 +366,27 @@ export default function FallbackPage() {
         {/* Strategy selector */}
         <section className="rounded-3xl border bg-card p-5">
           <div className="flex items-baseline justify-between mb-3">
-            <h2 className="text-sm font-medium">{t('strategies.title')}</h2>
+            <div className="min-w-0">
+              <h2 className="text-sm font-medium">{t('strategies.title')}</h2>
+              {/* The strategy belongs to the selected chain only. */}
+              {routing?.activeChain && (
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {routing.strategyScope === 'chain'
+                    ? t('strategies.scopeChain', { name: routing.activeChain.name })
+                    : t('strategies.scopeInherit', { name: routing.activeChain.name })}
+                  {routing.strategyScope === 'chain' && (
+                    <button
+                      type="button"
+                      className="ml-2 underline decoration-dotted underline-offset-2 hover:text-foreground"
+                      disabled={strategyMutation.isPending}
+                      onClick={() => strategyMutation.mutate({ strategy, resetChainStrategy: true })}
+                    >
+                      {t('strategies.scopeReset')}
+                    </button>
+                  )}
+                </p>
+              )}
+            </div>
             {routing?.weights && (
               <span className="text-xs text-muted-foreground tabular-nums">
                 {t('strategies.weightsSummary', {

@@ -3,7 +3,7 @@ import type { ChatMessage, ChatContent } from '@freellmapi/shared/types.js';
 import { getSetting, setSetting } from '../db/index.js';
 import { setRequestRoutingStrategy } from '../lib/client-context.js';
 import { CLAIRIC_MODEL, DecisionError, listDecisionModels, runDecision } from './decision.js';
-import { getRoutingStrategy } from './router.js';
+import { getRoutingStrategy, type ChainStrategy } from './router.js';
 import type { PresetStrategy } from './scoring.js';
 
 // Decision routing (#1354). With the 'decision' strategy on, a decision model
@@ -223,7 +223,7 @@ export async function chooseRoutingPreset(messages: readonly ChatMessage[], sign
  */
 export async function applyDecisionRouting(
   messages: readonly ChatMessage[],
-  opts: { pinned?: boolean; preset?: PresetStrategy; signal?: AbortSignal } = {},
+  opts: { pinned?: boolean; preset?: PresetStrategy | ChainStrategy; signal?: AbortSignal } = {},
 ): Promise<DecisionPick | null> {
   // A request that named an `auto:<axis>` alias already picked its preset
   // (#1628): don't spend a decision call on it — the alias's axis routes the

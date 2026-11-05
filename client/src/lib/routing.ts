@@ -105,7 +105,13 @@ export interface RoutingScore {
 }
 
 export interface RoutingData {
+  /** The selected (active) chain's strategy: its own, else the global one. */
   strategy: RoutingStrategy
+  /** Where `strategy` comes from: set on this chain, or inherited. Optional so an
+   *  older server still renders. */
+  strategyScope?: 'chain' | 'global'
+  globalStrategy?: RoutingStrategy
+  activeChain?: { id: number; name: string } | null
   /** Optional so an older server (no decision routing) still renders. */
   decision?: DecisionRoutingStatus
   weights: RoutingWeights | null

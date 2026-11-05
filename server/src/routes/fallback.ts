@@ -7,7 +7,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { getDb } from '../db/index.js';
-import { getAllPenalties, getRoutingScores, getRoutingStrategy, setRoutingStrategy, setCustomWeights, getExploreEnabled, setExploreEnabled, getPeakHoursConfig, setPeakHoursConfig, getActiveRoutingWeights, getKeySelectionStrategy, setKeySelectionStrategy, getStickySessionsMode, setStickySessionsMode } from '../services/router.js';
+import { getAllPenalties, getRoutingScores, getRoutingStrategy, setRoutingStrategy, setCustomWeights, getExploreEnabled, setExploreEnabled, getPeakHoursConfig, setPeakHoursConfig, getActiveRoutingWeights, getKeySelectionStrategy, setKeySelectionStrategy, getStickySessionsMode, setStickySessionsMode, activeChainStrategy, setProfileStrategy, type ChainStrategy } from '../services/router.js';
 import { BANDIT_PRESETS, isValidTimezone, type RoutingStrategy } from '../services/scoring.js';
 import { parseBudget, monthlyBudgetScore } from '../lib/budget.js';
 import { getModelGroups } from '../services/model-groups.js';
@@ -33,8 +33,19 @@ fallbackRouter.get('/quota-forecast', (_req: Request, res: Response) => {
 //                 breakdown (reliability / speed / intelligence + guardrails).
 fallbackRouter.get('/routing', (_req: Request, res: Response) => {
   const { peakHours, ...rest } = getRoutingScores();
+  const db = getDb();
+  const activeId = getActiveProfileId(db);
+  const activeChain = activeId != null
+    ? db.prepare('SELECT id, name FROM profiles WHERE id = ?').get(activeId) as { id: number; name: string } | undefined
+    : undefined;
   res.json({
     ...rest,
+    // `strategy` is the ACTIVE CHAIN's strategy (its own, else the global one);
+    // `strategyScope` says which, and `globalStrategy` is what chains without
+    // their own inherit.
+    strategyScope: activeChainStrategy(db).scope,
+    globalStrategy: getRoutingStrategy(),
+    activeChain: activeChain ?? null,
     stickySessions: getStickySessionsMode(),
     peakHoursAdjust: peakHours.enabled,
     peakStartHour: peakHours.startHour,
@@ -95,6 +106,8 @@ const routingSchema = z.object({
   // Balanced. Saved whatever the strategy, so they can be set before switching.
   decisionModel: z.string().trim().min(1).max(200).optional(),
   decisionMinProbability: z.number().min(0).max(1).optional(),
+  // Drop the selected chain's own strategy so it inherits the global one again.
+  resetChainStrategy: z.boolean().optional(),
 });
 
 // PUT /routing → switch strategy. Presets are just weight vectors over the three
@@ -116,7 +129,29 @@ fallbackRouter.put('/routing', (req: Request, res: Response) => {
       return;
     }
   }
-  setRoutingStrategy(parsed.data.strategy as RoutingStrategy);
+  // The strategy belongs to the SELECTED chain: with a chain active it is
+  // written there only, leaving every other chain (and the global default)
+  // alone. Without any profile (legacy install) it stays the global setting.
+  const db = getDb();
+  const activeId = getActiveProfileId(db);
+  const requestedStrategy = parsed.data.strategy as RoutingStrategy;
+  if (activeId == null) {
+    setRoutingStrategy(requestedStrategy);
+  } else if (parsed.data.resetChainStrategy) {
+    setProfileStrategy(db, activeId, null);
+  } else if (requestedStrategy === 'decision') {
+    // 'decision' needs a per-request model call keyed off the GLOBAL setting,
+    // so it cannot be a per-chain value: picking it makes it the global
+    // strategy and lets this chain inherit it. Chains with their own strategy
+    // are unaffected.
+    setRoutingStrategy('decision');
+    setProfileStrategy(db, activeId, null);
+  } else if (requestedStrategy !== activeChainStrategy(db).strategy) {
+    // Only a real change is written, so saving an unrelated routing knob (the
+    // dashboard sends the current strategy along with it) never turns an
+    // inherited strategy into a frozen per-chain copy.
+    setProfileStrategy(db, activeId, requestedStrategy as ChainStrategy);
+  }
   if (parsed.data.stickySessions !== undefined) {
     setStickySessionsMode(parsed.data.stickySessions);
   }
@@ -148,7 +183,8 @@ fallbackRouter.put('/routing', (req: Request, res: Response) => {
   const active = getActiveRoutingWeights();
   const peak = getPeakHoursConfig();
   res.json({
-    strategy: getRoutingStrategy(),
+    strategy: activeChainStrategy(db).strategy,
+    strategyScope: activeChainStrategy(db).scope,
     stickySessions: getStickySessionsMode(),
     exploreEnabled: getExploreEnabled(),
     keySelectionStrategy: getKeySelectionStrategy(),

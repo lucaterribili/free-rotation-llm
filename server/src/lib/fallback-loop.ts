@@ -566,7 +566,7 @@ export function recordRetryableFailure(route: RouteResult, err: any, state: Fall
   //   - 429 → no bench at all: the next request tries it again right away.
   // A daily-quota 429, 402/403 and 401 are facts about the account, not a bad
   // minute, so they keep their normal bench.
-  if (effectiveRoutingStrategy() === 'primary-first' && isProviderMomentFailure(err) && !isDailyQuotaExhaustedError(err)) {
+  if ((getRequestTrace()?.strategy ?? effectiveRoutingStrategy()) === 'primary-first' && isProviderMomentFailure(err) && !isDailyQuotaExhaustedError(err)) {
     if (!isRateLimitSignal(err)) benchedForNextCycle.add(route.modelDbId);
     return false;
   }

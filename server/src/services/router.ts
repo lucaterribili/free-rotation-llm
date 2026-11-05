@@ -41,7 +41,7 @@ import { customEndpointKeyIds } from './custom-endpoint.js';
 import { isDegraded } from './degradation.js';
 import { modelStatsKey, endpointScopeForBaseUrl } from '../lib/endpoint-scope.js';
 import { isToolBenched } from '../lib/tool-capability.js';
-import { recordRouteSkips } from '../lib/attempt-trace.js';
+import { recordRouteSkips, getRequestTrace } from '../lib/attempt-trace.js';
 import { parseModelScope, scopeAllows } from '../lib/model-scope.js';
 import { getKeyQuotaHeadroom, inferQuotaPoolKey } from './provider-quota.js';
 import type { BaseProvider } from '../providers/base.js';
@@ -807,7 +807,7 @@ function weightsFor(strategy: RoutingStrategy): RoutingWeights | null {
  *  whether the peak-hours adjustment moved it. Cheap (settings reads only) —
  *  for the PUT /routing echo, which must not pay for a full score sweep. */
 export function getActiveRoutingWeights(): { weights: RoutingWeights | null; adjusted: boolean } {
-  return weightsWithPeak(getRoutingStrategy());
+  return weightsWithPeak(activeChainStrategy(getDb()).strategy);
 }
 
 // ── Analytics stats cache (decay-weighted) ──────────────────────────────────
@@ -1323,7 +1323,7 @@ export interface ResolvedChain {
    *  ordering away (#1628) — callers must pass this through so the request is
    *  scored under the axis the client asked for. Absent for plain `auto` and
    *  `auto:<chain-name>`, where the operator's global strategy is what governs. */
-  strategyOverride?: PresetStrategy;
+  strategyOverride?: ChainStrategy;
 }
 
 const GLOBAL_SORT_ALIASES: Record<string, string> = {
@@ -1333,6 +1333,28 @@ const GLOBAL_SORT_ALIASES: Record<string, string> = {
   reliable: 'reliable', reliability: 'reliable',
   balanced: 'balanced',
 };
+
+/** A strategy a single chain can carry. 'decision' is global-only: it needs a
+ *  per-request model call that is keyed off the global setting. */
+export type ChainStrategy = Exclude<RoutingStrategy, 'decision'>;
+
+/** The chain's own strategy, or null when it inherits the global one. */
+export function getProfileStrategy(db: Db, profileId: number | null | undefined): ChainStrategy | null {
+  if (profileId == null) return null;
+  const row = db.prepare('SELECT strategy FROM profiles WHERE id = ?').get(profileId) as { strategy: string | null } | undefined;
+  const raw = row?.strategy;
+  return raw && raw !== 'decision' && (VALID_STRATEGIES as string[]).includes(raw) ? raw as ChainStrategy : null;
+}
+
+export function setProfileStrategy(db: Db, profileId: number, strategy: ChainStrategy | null): void {
+  db.prepare('UPDATE profiles SET strategy = ? WHERE id = ?').run(strategy, profileId);
+}
+
+/** Strategy the dashboard shows for the active chain: its own, else the global. */
+export function activeChainStrategy(db: Db): { strategy: RoutingStrategy; scope: 'chain' | 'global' } {
+  const own = getProfileStrategy(db, getActiveProfileId(db));
+  return own ? { strategy: own, scope: 'chain' } : { strategy: getRoutingStrategy(), scope: 'global' };
+}
 
 /** The routing preset each global-sort axis stands for. Shared by the chain
  *  sort in getChainByGlobalSort and by ResolvedChain.strategyOverride, so the
@@ -1476,18 +1498,26 @@ function activeChainOrThrow(db: Db): ChainRow[] {
 export function resolveRoutingChain(modelString: string | undefined): ResolvedChain {
   const db = getDb();
 
+  // The active chain routes under ITS strategy when it has one (see
+  // profiles.strategy); undefined leaves the global strategy in charge.
+  const activeResolved = (): ResolvedChain => ({
+    chain: activeChainOrThrow(db),
+    strategyKey: 'auto',
+    strategyOverride: getProfileStrategy(db, getActiveProfileId(db)) ?? undefined,
+  });
+
   if (!modelString || modelString.toLowerCase() === 'auto') {
-    return { chain: activeChainOrThrow(db), strategyKey: 'auto' };
+    return activeResolved();
   }
 
   const lower = modelString.toLowerCase();
   if (!lower.startsWith('auto:')) {
-    return { chain: activeChainOrThrow(db), strategyKey: 'auto' };
+    return activeResolved();
   }
 
   const suffix = lower.slice('auto:'.length).trim();
   if (!suffix) {
-    return { chain: activeChainOrThrow(db), strategyKey: 'auto' };
+    return activeResolved();
   }
 
   const globalAxis = GLOBAL_SORT_ALIASES[suffix];
@@ -1521,7 +1551,12 @@ export function resolveRoutingChain(modelString: string | undefined): ResolvedCh
     throw err;
   }
 
-  return { chain, strategyKey: `auto:${suffix}` };
+  const named = db.prepare('SELECT id FROM profiles WHERE LOWER(name) = ?').get(suffix) as { id: number } | undefined;
+  return {
+    chain,
+    strategyKey: `auto:${suffix}`,
+    strategyOverride: getProfileStrategy(db, named?.id) ?? undefined,
+  };
 }
 
 // Weights for the in-model key score (#580). Reliability dominates: the point
@@ -2230,7 +2265,7 @@ export function resolveFusionCandidate(modelId: string): FusionCandidate | null 
  *   global one. Set by the `auto:<axis>` aliases (ResolvedChain.strategyOverride,
  *   #1628); leave unset everywhere else.
  */
-export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, preferredModelDbId?: number, requireVision = false, requireTools = false, skipModels?: Set<number>, prefetchedChain?: ChainRow[], requireStructured = false, skipPlatforms?: Set<string>, exactOutputReserve = 0, task?: 'code' | 'chat', strategyOverride?: PresetStrategy): RouteResult {
+export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, preferredModelDbId?: number, requireVision = false, requireTools = false, skipModels?: Set<number>, prefetchedChain?: ChainRow[], requireStructured = false, skipPlatforms?: Set<string>, exactOutputReserve = 0, task?: 'code' | 'chat', strategyOverride?: ChainStrategy): RouteResult {
   const db = getDb();
 
   // The alias's axis wins for this request (#1628): scoring the prefetched
@@ -2239,6 +2274,10 @@ export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, pre
   // with governs — the operator's setting, or the preset the 'decision' model
   // picked (#1354).
   const strategy = strategyOverride ?? effectiveRoutingStrategy();
+  // The loop's failure bookkeeping reads the strategy THIS request routes
+  // under (a chain can differ from the global one).
+  const requestTrace = getRequestTrace();
+  if (requestTrace) requestTrace.strategy = strategy;
   // Strict strategies walk the manual order and never consult the bandit, so
   // there is no stats refresh and no exploration draw to make.
   const strictOrder = strategy === 'priority' || strategy === 'primary-first';
@@ -2499,7 +2538,7 @@ export interface RoutingScore {
 
 export function getRoutingScores(): { strategy: RoutingStrategy; keySelectionStrategy: KeySelectionStrategy; weights: RoutingWeights | null; customWeights: RoutingWeights; exploreEnabled: boolean; peakAdjusted: boolean; peakHours: PeakHoursConfig; scores: RoutingScore[] } {
   const db = getDb();
-  const strategy = getRoutingStrategy();
+  const strategy = activeChainStrategy(db).strategy;
   refreshStatsCache(db);
 
   // Score the whole enabled catalog, not just the active chain (#1047). Since
@@ -2618,7 +2657,7 @@ function primaryChainEntry(chain: ChainRow[]): ChainRow | undefined {
 export function stickyPreferenceForChain(
   stickyModelDbId: number | undefined,
   chain: ChainRow[],
-  strategyOverride?: PresetStrategy,
+  strategyOverride?: ChainStrategy,
 ): number | undefined {
   if (stickyModelDbId == null) return undefined;
   const mode = getStickySessionsMode();
@@ -2653,7 +2692,7 @@ export function stickyPreferenceForChain(
 export function resolveStickyPreference(
   stickyModelDbId: number | undefined,
   chain?: ChainRow[],
-  strategyOverride?: PresetStrategy,
+  strategyOverride?: ChainStrategy,
 ): number | undefined {
   if (stickyModelDbId == null) return undefined;
   return stickyPreferenceForChain(stickyModelDbId, chain ?? getActiveChain(getDb()), strategyOverride);

@@ -59,6 +59,9 @@ export interface RequestTrace {
   // these so a caller can see why the primary was not tried. Empty for every
   // other strategy, where the existing trail behaviour is unchanged.
   routeSkips: string[];
+  // The routing strategy the router resolved for this request (chain-level or
+  // global); set by routeRequest, read by the failure bookkeeping.
+  strategy?: string;
   // Rowid of the most recent `requests` row logged during this trace's run;
   // null until the first logRequest lands (e.g. a client abort on attempt 1).
   lastRequestRowId: number | null;

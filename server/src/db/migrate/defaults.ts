@@ -48,6 +48,7 @@ import * as removeAurayProvider from '../migrations/20261019_000001_remove_auray
 import * as keyLastHealthyAt from '../migrations/20261020_000001_key_last_healthy_at.js';
 import * as cloudflareNeuronUsage from '../migrations/20261104_000001_cloudflare_neuron_usage.js';
 import * as chainPrimaryFlag from '../migrations/20261105_000001_chain_primary_flag.js';
+import * as profileStrategy from '../migrations/20261105_000002_profile_strategy.js';
 
 export interface MigrationModule {
   up(db: Db): void;
@@ -108,6 +109,7 @@ export const REMOVE_AURAY_PROVIDER_FILENAME = '20261019_000001_remove_auray_prov
 export const KEY_LAST_HEALTHY_AT_FILENAME = '20261020_000001_key_last_healthy_at.ts';
 export const CLOUDFLARE_NEURON_USAGE_FILENAME = '20261104_000001_cloudflare_neuron_usage.ts';
 export const CHAIN_PRIMARY_FLAG_FILENAME = '20261105_000001_chain_primary_flag.ts';
+export const PROFILE_STRATEGY_FILENAME = '20261105_000002_profile_strategy.ts';
 
 export const DEFAULT_MIGRATIONS: readonly DefaultMigration[] = [
   { filename: LEGACY_BASELINE_FILENAME, module: legacyBaseline },
@@ -159,4 +161,5 @@ export const DEFAULT_MIGRATIONS: readonly DefaultMigration[] = [
   { filename: KEY_LAST_HEALTHY_AT_FILENAME, module: keyLastHealthyAt },
   { filename: CLOUDFLARE_NEURON_USAGE_FILENAME, module: cloudflareNeuronUsage },
   { filename: CHAIN_PRIMARY_FLAG_FILENAME, module: chainPrimaryFlag },
+  { filename: PROFILE_STRATEGY_FILENAME, module: profileStrategy },
 ];
