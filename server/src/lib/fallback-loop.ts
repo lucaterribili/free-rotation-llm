@@ -18,7 +18,7 @@ import { benchCloudflareAccount } from '../services/cloudflare-daily-quota.js';
 // the fire-and-forget key revalidation kicked off on an upstream 401 (below).
 
 import type { RouteResult } from '../services/router.js';
-import { recordRateLimitHit, recordModelFailure, recordSuccess, hasOtherUsableKey, routableKeyIdsForModel, formatResetEta, isProviderMomentAttributionEnabled } from '../services/router.js';
+import { recordRateLimitHit, recordModelFailure, recordSuccess, hasOtherUsableKey, routableKeyIdsForModel, formatResetEta, isProviderMomentAttributionEnabled, effectiveRoutingStrategy } from '../services/router.js';
 import { safeHeaderValue } from './header-value.js';
 import {
   recordRequest,
@@ -253,8 +253,19 @@ export function fallbackRoutingTokens(state: FallbackState, estimatedTotal: numb
   );
 }
 
+// 'primary-first' bench-for-one-cycle (#primary-pool): models that failed with
+// a transient 5xx/timeout. The NEXT request to start consumes the set into its
+// skipModels (it sits that one request out); later requests see an empty set.
+const benchedForNextCycle = new Set<number>();
+
+export function resetBenchedForNextCycle(): void {
+  benchedForNextCycle.clear();
+}
+
 export function newFallbackState(): FallbackState {
-  return { skipKeys: new Set<string>(), skipModels: new Set<number>(), skipPlatforms: new Set<string>(), modelNotFoundPlatforms: new Map() };
+  const skipModels = new Set<number>(benchedForNextCycle);
+  benchedForNextCycle.clear();
+  return { skipKeys: new Set<string>(), skipModels, skipPlatforms: new Set<string>(), modelNotFoundPlatforms: new Map() };
 }
 
 // DISTINCT model_not_found hops on one platform, within one request, before the
@@ -545,6 +556,20 @@ export function recordRetryableFailure(route: RouteResult, err: any, state: Fall
     return false;
   }
   if (consumeSkipBenchExemption(route, err)) return true;
+  // 'primary-first' contract: every request cycles the primary pool first.
+  // Transient provider failures therefore never reach the persisted cooldown /
+  // failure-window / scorer-penalty books (they would sink the primary for
+  // minutes); they only rule the key/platform out for THIS request (skipKeys /
+  // skipPlatforms above):
+  //   - 5xx / timeout / transport → the model sits out the NEXT request only
+  //     ("panchina per un ciclo"), then rejoins its place in the pool;
+  //   - 429 → no bench at all: the next request tries it again right away.
+  // A daily-quota 429, 402/403 and 401 are facts about the account, not a bad
+  // minute, so they keep their normal bench.
+  if (effectiveRoutingStrategy() === 'primary-first' && isProviderMomentFailure(err) && !isDailyQuotaExhaustedError(err)) {
+    if (!isRateLimitSignal(err)) benchedForNextCycle.add(route.modelDbId);
+    return false;
+  }
   const decision = cooldownDecisionForError(route, err);
   setCooldown(route.platform, route.modelId, route.keyId, decision.durationMs, decision.source);
   // Workers AI's daily neurons pool is per ACCOUNT: bench every model on every

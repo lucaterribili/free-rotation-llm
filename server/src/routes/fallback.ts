@@ -192,6 +192,7 @@ const MODEL_JOINS = `
 // PUT below, which writes the row into the chain. Nothing is persisted by GET.
 const PROFILE_CHAIN_SQL = `
     SELECT m.id AS model_db_id, pm.priority AS chain_priority, pm.enabled AS chain_enabled,
+           pm.is_primary AS chain_primary,
            fc.priority AS catalog_priority,
 ${MODEL_COLUMNS}
     FROM models m
@@ -202,7 +203,7 @@ ${MODEL_JOINS}
 `;
 
 const GLOBAL_CHAIN_SQL = `
-    SELECT fc.model_db_id, fc.priority, fc.enabled,
+    SELECT fc.model_db_id, fc.priority, fc.enabled, fc.is_primary,
 ${MODEL_COLUMNS}
     FROM fallback_config fc
     JOIN models m ON m.id = fc.model_db_id
@@ -229,8 +230,8 @@ function orderProfileRows(rows: any[]): any[] {
 
   const maxStored = inChain.length ? inChain[inChain.length - 1].chain_priority : 0;
   return [
-    ...inChain.map(r => ({ ...r, priority: r.chain_priority, enabled: r.chain_enabled })),
-    ...rest.map((r, i) => ({ ...r, priority: maxStored + 1 + i, enabled: 0 })),
+    ...inChain.map(r => ({ ...r, priority: r.chain_priority, enabled: r.chain_enabled, is_primary: r.chain_primary ?? 0 })),
+    ...rest.map((r, i) => ({ ...r, priority: maxStored + 1 + i, enabled: 0, is_primary: 0 })),
   ];
 }
 
@@ -298,6 +299,9 @@ fallbackRouter.get('/', (req: Request, res: Response) => {
       penalty: penalty?.penalty ?? 0,
       rateLimitHits: penalty?.count ?? 0,
       enabled: r.enabled === 1,
+      // Primary pool membership (strategy 'primary-first'): primaries are
+      // cycled first on every request, unflagged entries are fallbacks.
+      primary: r.is_primary === 1,
       platform: r.platform,
       modelId: r.model_id,
       displayName: r.display_name,
@@ -352,6 +356,8 @@ const updateSchema = z.array(z.object({
   modelDbId: z.number(),
   priority: z.number(),
   enabled: z.boolean(),
+  // Optional so older clients that only send priority/enabled keep the stored flag.
+  primary: z.boolean().optional(),
 }));
 
 /**
@@ -383,22 +389,24 @@ fallbackRouter.put('/', (req: Request, res: Response) => {
     ? (() => {
         const known = knownModelIds(db);
         const upsert = db.prepare(`
-          INSERT INTO profile_models (profile_id, model_db_id, priority, enabled)
-          VALUES (?, ?, ?, ?)
+          INSERT INTO profile_models (profile_id, model_db_id, priority, enabled, is_primary)
+          VALUES (?, ?, ?, ?, COALESCE(?, 0))
           ON CONFLICT(profile_id, model_db_id)
-          DO UPDATE SET priority = excluded.priority, enabled = excluded.enabled
+          DO UPDATE SET priority = excluded.priority, enabled = excluded.enabled,
+                        is_primary = COALESCE(?, profile_models.is_primary)
         `);
         return db.transaction(() => {
           for (const entry of parsed.data) {
             if (!known.has(entry.modelDbId)) continue;
-            upsert.run(activeProfileId, entry.modelDbId, entry.priority, entry.enabled ? 1 : 0);
+            const prim = entry.primary === undefined ? null : (entry.primary ? 1 : 0);
+            upsert.run(activeProfileId, entry.modelDbId, entry.priority, entry.enabled ? 1 : 0, prim, prim);
           }
         });
       })()
     : (() => {
-        const update = db.prepare('UPDATE fallback_config SET priority = ?, enabled = ? WHERE model_db_id = ?');
+        const update = db.prepare('UPDATE fallback_config SET priority = ?, enabled = ?, is_primary = COALESCE(?, is_primary) WHERE model_db_id = ?');
         return db.transaction(() => {
-          for (const entry of parsed.data) update.run(entry.priority, entry.enabled ? 1 : 0, entry.modelDbId);
+          for (const entry of parsed.data) update.run(entry.priority, entry.enabled ? 1 : 0, entry.primary === undefined ? null : (entry.primary ? 1 : 0), entry.modelDbId);
         });
       })();
   writeAll();

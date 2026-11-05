@@ -342,7 +342,7 @@ export function RankEditor({ rank, onMoveRank }: { rank: number; onMoveRank: (to
 // The collapsed header row for a logical-model group: name, provider count,
 // union vision/tools badges, the best member's axis bars + score, and a single
 // switch that enables/disables every provider in the group.
-export function GroupHeaderCells({ group, rank, dragHandle, editableRank, onMoveRank, onToggleGroup, allRows, rateUsage }: {
+export function GroupHeaderCells({ group, rank, dragHandle, editableRank, onMoveRank, onToggleGroup, onTogglePrimary, allRows, rateUsage }: {
   group: ModelGroupRow
   rank: number
   dragHandle?: ReactNode
@@ -350,6 +350,9 @@ export function GroupHeaderCells({ group, rank, dragHandle, editableRank, onMove
   editableRank?: boolean
   onMoveRank?: (toRank: number) => void
   onToggleGroup: (memberIds: number[], enabled: boolean) => void
+  // 'primary-first' only: marks the group as part of the primary pool (cycled
+  // first on every request). Omit to hide the star.
+  onTogglePrimary?: (memberIds: number[], primary: boolean) => void
   // Every configured row, for endpoint disambiguation. Two relays serving one
   // model id land in different display groups the moment one copy is renamed,
   // so the group's own members are not a complete sibling set (#651).
@@ -453,18 +456,39 @@ export function GroupHeaderCells({ group, rank, dragHandle, editableRank, onMove
         )}
       </td>
       <td className="py-2 pr-3 align-middle text-right" onClick={e => e.stopPropagation()}>
-        <Switch checked={anyEnabled} onCheckedChange={(c) => onToggleGroup(group.members.map(m => m.modelDbId), c)} />
+        <div className="inline-flex items-center gap-2">
+          {onTogglePrimary && (() => {
+            const isPrimary = group.members.some(m => m.primary)
+            return (
+              <Tooltip text={isPrimary ? t('models.primaryOn') : t('models.primaryOff')}>
+                <button
+                  type="button"
+                  aria-pressed={isPrimary}
+                  aria-label={isPrimary ? t('models.primaryOn') : t('models.primaryOff')}
+                  onClick={() => onTogglePrimary(group.members.map(m => m.modelDbId), !isPrimary)}
+                  className={`transition-colors ${isPrimary ? 'text-amber-500' : 'text-muted-foreground/40 hover:text-foreground'}`}
+                >
+                  <svg viewBox="0 0 24 24" className="size-4" fill={isPrimary ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8L12 2.5z" />
+                  </svg>
+                </button>
+              </Tooltip>
+            )
+          })()}
+          <Switch checked={anyEnabled} onCheckedChange={(c) => onToggleGroup(group.members.map(m => m.modelDbId), c)} />
+        </div>
       </td>
     </>
   )
 }
 
-export function SortableGroupRow({ group, rank, editableRank, onMoveRank, onToggleGroup, allRows, rateUsage }: {
+export function SortableGroupRow({ group, rank, editableRank, onMoveRank, onToggleGroup, onTogglePrimary, allRows, rateUsage }: {
   group: ModelGroupRow
   rank: number
   editableRank?: boolean
   onMoveRank?: (toRank: number) => void
   onToggleGroup: (memberIds: number[], enabled: boolean) => void
+  onTogglePrimary?: (memberIds: number[], primary: boolean) => void
   allRows?: readonly Row[]
   rateUsage?: ReadonlyMap<number, RateLimitUsageRow>
 }) {
@@ -494,7 +518,7 @@ export function SortableGroupRow({ group, rank, editableRank, onMoveRank, onTogg
       onClick={() => navigate(`/models/chat/${detailId}`)}
       className={`group/row border-b last:border-0 bg-card cursor-pointer transition-colors hover:[&>td]:bg-muted/50 [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg ${isDragging ? 'opacity-50' : ''} ${anyEnabled ? (depleted ? 'opacity-60' : '') : 'opacity-50'}`}
     >
-      <GroupHeaderCells group={group} rank={rank} dragHandle={handle} editableRank={editableRank} onMoveRank={onMoveRank} onToggleGroup={onToggleGroup} allRows={allRows} rateUsage={rateUsage} />
+      <GroupHeaderCells group={group} rank={rank} dragHandle={handle} editableRank={editableRank} onMoveRank={onMoveRank} onToggleGroup={onToggleGroup} onTogglePrimary={onTogglePrimary} allRows={allRows} rateUsage={rateUsage} />
     </tr>
   )
 }

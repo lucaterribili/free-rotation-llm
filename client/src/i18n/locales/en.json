@@ -291,7 +291,9 @@
     "disableAll": "Disable all",
     "enableAllHint": "Turn on every model shown, then Save",
     "disableAllHint": "Turn off every model shown, then Save",
-    "enabledOfShown": "{enabled} of {shown} shown models are in the chain"
+    "enabledOfShown": "{enabled} of {shown} shown models are in the chain",
+    "primaryOn": "Primary pool: tried first on every request. Click to move to fallbacks.",
+    "primaryOff": "Fallback. Click to add it to the primary pool (tried first on every request)."
   },
   "strategies": {
     "explore": "Explore unmeasured models",

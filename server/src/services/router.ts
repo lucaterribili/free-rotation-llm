@@ -172,6 +172,8 @@ export interface ChainRow {
   // Custom models bind to the api_keys row carrying their endpoint (#212);
   // NULL for built-in platforms.
   key_id: number | null;
+  /** 1 when the entry belongs to the chain's primary pool (primary-first). */
+  is_primary?: number;
   // The endpoint this row belongs to ('' for catalog platforms). Two relays can
   // each hold a row for the same model_id, and everything scored or rate-limited
   // per model has to tell them apart (#651).
@@ -1246,7 +1248,7 @@ function orderChain(chain: ChainRow[], strategy: RoutingStrategy, sampled = true
     if (strategy === 'primary-first') {
       return chain
         .map((e, i) => ({ e, i }))
-        .sort((a, b) => tier(a.e) - tier(b.e) || a.e.priority - b.e.priority || a.i - b.i)
+        .sort((a, b) => tier(a.e) - tier(b.e) || (b.e.is_primary ?? 0) - (a.e.is_primary ?? 0) || a.e.priority - b.e.priority || a.i - b.i)
         .map(x => x.e);
     }
     // Legacy priority mode: manual chain order + the 429/failure penalty,
@@ -1378,7 +1380,7 @@ function getActiveChain(db: Db): ChainRow[] {
   let rows: ChainRow[];
   if (profileId != null) {
     rows = db.prepare(`
-      SELECT pm.model_db_id, pm.priority, pm.enabled,
+      SELECT pm.model_db_id, pm.priority, pm.enabled, pm.is_primary,
              m.platform, m.model_id, m.display_name, m.intelligence_rank,
              m.size_label, m.monthly_token_budget,
              m.rpm_limit, m.rpd_limit, m.tpm_limit, m.tpd_limit, m.supports_vision,
@@ -1390,7 +1392,7 @@ function getActiveChain(db: Db): ChainRow[] {
     `).all(profileId) as ChainRow[];
   } else {
     rows = db.prepare(`
-      SELECT fc.model_db_id, fc.priority, fc.enabled,
+      SELECT fc.model_db_id, fc.priority, fc.enabled, fc.is_primary,
              m.platform, m.model_id, m.display_name, m.intelligence_rank,
              m.size_label, m.monthly_token_budget,
              m.rpm_limit, m.rpd_limit, m.tpm_limit, m.tpd_limit, m.supports_vision,
@@ -1409,7 +1411,7 @@ function getChainByProfileName(db: Db, name: string): ChainRow[] | null {
   if (!profile) return null;
 
   return db.prepare(`
-    SELECT pm.model_db_id, pm.priority, pm.enabled,
+    SELECT pm.model_db_id, pm.priority, pm.enabled, pm.is_primary,
            m.platform, m.model_id, m.display_name, m.intelligence_rank,
            m.size_label, m.monthly_token_budget,
            m.rpm_limit, m.rpd_limit, m.tpm_limit, m.tpd_limit, m.supports_vision,
@@ -2587,7 +2589,10 @@ function primaryChainEntry(chain: ChainRow[]): ChainRow | undefined {
     if (!best) { best = entry; continue; }
     const tier = entry.match_tier ?? 0;
     const bestTier = best.match_tier ?? 0;
-    if (tier < bestTier || (tier === bestTier && entry.priority < best.priority)) best = entry;
+    const prim = entry.is_primary ?? 0;
+    const bestPrim = best.is_primary ?? 0;
+    if (tier < bestTier
+      || (tier === bestTier && (prim > bestPrim || (prim === bestPrim && entry.priority < best.priority)))) best = entry;
   }
   return best;
 }

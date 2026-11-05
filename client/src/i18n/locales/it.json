@@ -291,7 +291,9 @@
     "disableAll": "Disattiva tutti",
     "enableAllHint": "Attiva tutti i modelli mostrati, poi salva",
     "disableAllHint": "Disattiva tutti i modelli mostrati, poi salva",
-    "enabledOfShown": "{enabled} dei {shown} modelli mostrati sono nella catena"
+    "enabledOfShown": "{enabled} dei {shown} modelli mostrati sono nella catena",
+    "primaryOn": "Pool primary: provato per primo a ogni richiesta. Clicca per spostarlo nei fallback.",
+    "primaryOff": "Fallback. Clicca per aggiungerlo al pool primary (provato per primo a ogni richiesta)."
   },
   "strategies": {
     "explore": "Esplora i modelli non misurati",

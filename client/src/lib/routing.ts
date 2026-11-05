@@ -9,6 +9,8 @@ export interface FallbackEntry {
   penalty: number
   rateLimitHits: number
   enabled: boolean
+  // Primary pool membership (strategy 'primary-first'); absent on older servers.
+  primary?: boolean
   platform: string
   modelId: string
   displayName: string
@@ -526,6 +528,8 @@ export function buildGroups(
   rows: Row[],
   isManual: boolean,
   rateUsage?: ReadonlyMap<number, RateLimitUsageRow>,
+  // 'primary-first': groups holding a primary member are listed (and routed) first.
+  primaryFirst = false,
 ): ModelGroupRow[] {
   const map = new Map<string, Row[]>()
   for (const r of rows) {
@@ -541,7 +545,8 @@ export function buildGroups(
   }))
   groups.sort((a, b) =>
     isManual
-      ? Math.min(...a.members.map(m => m.priority)) - Math.min(...b.members.map(m => m.priority))
+      ? (primaryFirst ? Number(b.members.some(m => m.primary)) - Number(a.members.some(m => m.primary)) : 0)
+        || Math.min(...a.members.map(m => m.priority)) - Math.min(...b.members.map(m => m.priority))
       : Math.max(...b.members.map(m => m.score ?? 0)) - Math.max(...a.members.map(m => m.score ?? 0)),
   )
   if (rateUsage && !isManual) {

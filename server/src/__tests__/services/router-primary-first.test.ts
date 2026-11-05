@@ -13,7 +13,8 @@ import { getDb, initDb } from '../../db/index.js';
 import { addToActiveChain } from '../helpers/chain.js';
 import { setCooldown, clearCooldownEarly } from '../../services/ratelimit.js';
 import { newRequestTrace, runWithRequestTrace } from '../../lib/attempt-trace.js';
-import { setFallbackHeaders } from '../../lib/fallback-loop.js';
+import { setFallbackHeaders, recordRetryableFailure, newFallbackState, resetBenchedForNextCycle } from '../../lib/fallback-loop.js';
+import { isOnCooldown } from '../../services/ratelimit.js';
 
 // Only the rpm/rpd gate is stubbed: the cooldown tests need the real
 // setCooldown/isOnCooldown pair so early recovery is exercised end to end.
@@ -72,6 +73,7 @@ beforeEach(() => {
   canMakeRequestMock.mockReturnValue(true);
   setRoutingStrategy('primary-first');
   setStickySessionsMode('on');
+  resetBenchedForNextCycle();
 });
 
 afterEach(() => {
@@ -201,3 +203,61 @@ describe('primary-first routing', () => {
   });
 });
 
+
+describe('primary-first primary pool', () => {
+  function setPrimary(modelDbId: number) {
+    const db = getDb();
+    db.prepare('UPDATE fallback_config SET is_primary = 1 WHERE model_db_id = ?').run(modelDbId);
+    db.prepare('UPDATE profile_models SET is_primary = 1 WHERE model_db_id = ?').run(modelDbId);
+  }
+
+  it('cycles the flagged primaries first, even when a fallback ranks higher in the chain', () => {
+    addModel({ platform: 'groq', modelId: 'fallback-top', priority: 1 });
+    const p1 = addModel({ platform: 'google', modelId: 'p1', priority: 20 });
+    const p2 = addModel({ platform: 'cerebras', modelId: 'p2', priority: 30 });
+    setPrimary(p1.modelDbId); setPrimary(p2.modelDbId);
+
+    expect(routeRequest(100).modelId).toBe('p1');
+    // p1 sits this request out: the next primary of the pool serves before any fallback.
+    expect(routeRequest(100, undefined, undefined, false, false, new Set([p1.modelDbId])).modelId).toBe('p2');
+    // Whole pool out: only then the fallback.
+    expect(routeRequest(100, undefined, undefined, false, false, new Set([p1.modelDbId, p2.modelDbId])).modelId).toBe('fallback-top');
+  });
+
+  function failure(status: number, message: string) {
+    return Object.assign(new Error(message), { status });
+  }
+
+  it('a 503 benches the model for exactly the next request, with no cooldown', () => {
+    const p1 = addModel({ platform: 'google', modelId: 'p1', priority: 10 });
+    addModel({ platform: 'nvidia', modelId: 'fb', priority: 20 });
+    setPrimary(p1.modelDbId);
+
+    const route = routeRequest(100);
+    const state = newFallbackState();
+    recordRetryableFailure(route, failure(503, 'This model is currently experiencing high demand'), state);
+    expect(isOnCooldown('google', 'p1', p1.keyId)).toBe(false);
+
+    const next = newFallbackState();            // the next request sits p1 out
+    expect(next.skipModels.has(p1.modelDbId)).toBe(true);
+    expect(routeRequest(100, next.skipKeys, undefined, false, false, next.skipModels).modelId).toBe('fb');
+
+    const after = newFallbackState();           // and the one after is back to normal
+    expect(after.skipModels.size).toBe(0);
+    expect(routeRequest(100, after.skipKeys, undefined, false, false, after.skipModels).modelId).toBe('p1');
+  });
+
+  it('a 429 does not bench: the next request retries the primary at once', () => {
+    const p1 = addModel({ platform: 'google', modelId: 'p1', priority: 10 });
+    addModel({ platform: 'nvidia', modelId: 'fb', priority: 20 });
+    setPrimary(p1.modelDbId);
+
+    const route = routeRequest(100);
+    recordRetryableFailure(route, failure(429, 'Too many requests'), newFallbackState());
+    expect(isOnCooldown('google', 'p1', p1.keyId)).toBe(false);
+
+    const next = newFallbackState();
+    expect(next.skipModels.size).toBe(0);
+    expect(routeRequest(100, next.skipKeys, undefined, false, false, next.skipModels).modelId).toBe('p1');
+  });
+});

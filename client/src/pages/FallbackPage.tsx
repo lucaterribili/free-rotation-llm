@@ -172,7 +172,7 @@ export default function FallbackPage() {
   )
 
   const saveMutation = useMutation({
-    mutationFn: (data: { modelDbId: number; priority: number; enabled: boolean }[]) =>
+    mutationFn: (data: { modelDbId: number; priority: number; enabled: boolean; primary?: boolean }[]) =>
       apiFetch('/api/fallback', { method: 'PUT', body: JSON.stringify(data) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fallback'] })
@@ -226,7 +226,7 @@ export default function FallbackPage() {
   )
 
   function handleSave() {
-    saveMutation.mutate(allEntries.map(e => ({ modelDbId: e.modelDbId, priority: e.priority, enabled: e.enabled })))
+    saveMutation.mutate(allEntries.map(e => ({ modelDbId: e.modelDbId, priority: e.priority, enabled: e.enabled, primary: e.primary })))
   }
 
   function toggleOptions() {
@@ -241,7 +241,7 @@ export default function FallbackPage() {
 
   // ── Model unification: a model served by several providers is always shown as
   // one logical row that links to its own page (the on/off toggle was removed). ─
-  const orderedGroups = useMemo(() => buildGroups(rows, isManual, rateUsageByModel), [rows, isManual, rateUsageByModel])
+  const orderedGroups = useMemo(() => buildGroups(rows, isManual, rateUsageByModel, strategy === 'primary-first'), [rows, isManual, rateUsageByModel, strategy])
 
   // Catalog search + filters (#343). Filtering operates on whole logical-model
   // groups; rank stays the model's position in the full chain so the numbers
@@ -290,6 +290,13 @@ export default function FallbackPage() {
     const ids = new Set(memberIds)
     setLocalEntries(allEntries.map(e => (ids.has(e.modelDbId) ? { ...e, enabled } : e)))
   }
+
+  // 'primary-first' pool: stage the flag for every provider of the group; Save commits.
+  function handleTogglePrimary(memberIds: number[], primary: boolean) {
+    const ids = new Set(memberIds)
+    setLocalEntries(allEntries.map(e => (ids.has(e.modelDbId) ? { ...e, primary } : e)))
+  }
+  const onTogglePrimary = strategy === 'primary-first' ? handleTogglePrimary : undefined
 
   // Bulk on/off over what is currently on screen (#895). Curating a chain by
   // hand means turning most of the catalog off, which one row at a time over
@@ -679,7 +686,7 @@ export default function FallbackPage() {
                     <SortableContext items={renderedGroups.map(g => `grp:${g.key}`)} strategy={verticalListSortingStrategy}>
                       <tbody>
                         {renderedGroups.map(g => (
-                          <SortableGroupRow key={g.key} group={g} rank={rankByKey.get(g.key) ?? 0} editableRank onMoveRank={r => handleMoveGroupRank(g.key, r)} onToggleGroup={handleGroupToggle} allRows={rows} rateUsage={rateUsageByModel} />
+                          <SortableGroupRow key={g.key} group={g} rank={rankByKey.get(g.key) ?? 0} editableRank onMoveRank={r => handleMoveGroupRank(g.key, r)} onToggleGroup={handleGroupToggle} onTogglePrimary={onTogglePrimary} allRows={rows} rateUsage={rateUsageByModel} />
                         ))}
                       </tbody>
                     </SortableContext>
@@ -697,7 +704,7 @@ export default function FallbackPage() {
                         onClick={() => navigate(`/models/chat/${encodeURIComponent(g.members[0].canonicalId ?? g.members[0].modelId)}`)}
                         className={`group/row border-b last:border-0 cursor-pointer transition-colors hover:[&>td]:bg-muted/50 [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg ${g.members.some(m => m.enabled) ? (isGroupDepleted(g.members, rateUsageByModel) ? 'opacity-60' : '') : 'opacity-50'}`}
                       >
-                        <GroupHeaderCells group={g} rank={rankByKey.get(g.key) ?? 0} onToggleGroup={handleGroupToggle} allRows={rows} rateUsage={rateUsageByModel} />
+                        <GroupHeaderCells group={g} rank={rankByKey.get(g.key) ?? 0} onToggleGroup={handleGroupToggle} onTogglePrimary={onTogglePrimary} allRows={rows} rateUsage={rateUsageByModel} />
                       </tr>
                     ))}
                   </tbody>
