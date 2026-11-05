@@ -30,6 +30,7 @@ describe('settings dialog i18n', () => {
       'dedup',
       'lite',
       'read-lifecycle',
+      'tooloutput',
       'toolfilter',
       'jsoncompact',
       'relevance',

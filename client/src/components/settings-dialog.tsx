@@ -26,6 +26,7 @@ import { Tooltip } from '@/components/tooltip'
 import { SUPPORTED_LOCALES, type Locale, useI18n } from '@/i18n'
 import { type Theme, useTheme } from '@/theme-context'
 import { apiFetch } from '@/lib/api'
+import { engineInMode } from '@/lib/compression-modes'
 
 // Small info affordance used next to labels a first-time user can't be expected
 // to understand. It's a real <button> so it reaches the tooltip by keyboard
@@ -242,7 +243,7 @@ const themeIcons = {
   dark: Moon,
 } satisfies Record<Theme, typeof Monitor>
 
-type CompressionMode = 'off' | 'lossless' | 'standard' | 'aggressive'
+type CompressionMode = import('@/lib/compression-modes').CompressionMode
 
 interface CompressionEngineConfig {
   enabled: boolean
@@ -272,6 +273,7 @@ const ENGINES = [
   { id: 'dedup', tKey: 'engineDedup', lossless: true },
   { id: 'lite', tKey: 'engineLite', lossless: true },
   { id: 'read-lifecycle', tKey: 'engineReadLifecycle', lossless: false },
+  { id: 'tooloutput', tKey: 'engineTooloutput', lossless: true },
   { id: 'toolfilter', tKey: 'engineToolfilter', lossless: false },
   { id: 'jsoncompact', tKey: 'engineJsoncompact', lossless: true },
   { id: 'relevance', tKey: 'engineRelevance', lossless: false },
@@ -379,10 +381,15 @@ function CompressionSection({ state }: { state: CompressionState }) {
       </Row>
       <Row label={t('settings.compressionEngines')} hint={t('settings.compressionEnginesHelp')}>
         <ul className="grid gap-2 sm:grid-cols-2">
-          {ENGINES.map(engine => (
+          {ENGINES.map(engine => {
+            // The mode decides which engines run; a switch outside it shows off
+            // and locked, so changing mode visibly changes the list.
+            const inMode = engineInMode(config.mode, engine.id)
+            return (
             <li
               key={engine.id}
-              className="flex items-start justify-between gap-3 rounded-xl border px-3 py-2.5"
+              title={inMode ? undefined : t('settings.engineNotInMode')}
+              className={`flex items-start justify-between gap-3 rounded-xl border px-3 py-2.5 transition-opacity ${inMode ? '' : 'opacity-50'}`}
             >
               <div className="min-w-0 space-y-0.5">
                 <div className="flex items-center gap-1.5">
@@ -400,12 +407,14 @@ function CompressionSection({ state }: { state: CompressionState }) {
               <Switch
                 size="sm"
                 aria-label={t(`settings.${engine.tKey}`)}
-                checked={config.engines[engine.id]?.enabled ?? true}
+                checked={inMode && (config.engines[engine.id]?.enabled ?? true)}
+                disabled={!inMode}
                 onCheckedChange={checked => setEngineEnabled(engine.id, checked)}
                 className="mt-0.5"
               />
             </li>
-          ))}
+            )
+          })}
         </ul>
       </Row>
     </>

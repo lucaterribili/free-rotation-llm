@@ -22,6 +22,7 @@ const engineDefaults: Record<string, CompressionEngineConfig> = {
     maxCharsPerResult: 12_000,
     disabledFilters: [],
   },
+  tooloutput: { enabled: true },
   jsoncompact: { enabled: true, minRows: 8 },
   relevance: { enabled: true, maxChars: 18_000 },
   aging: { enabled: true, liveTurns: 3, condenseAfterTurns: 8 },

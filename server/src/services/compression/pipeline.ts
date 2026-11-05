@@ -26,11 +26,12 @@ import type {
 
 const MODE_ENGINES: Record<CompressionMode, Set<string>> = {
   off: new Set(),
-  lossless: new Set(['dedup', 'lite', 'jsoncompact']),
-  standard: new Set(['dedup', 'lite', 'read-lifecycle', 'toolfilter', 'jsoncompact']),
+  lossless: new Set(['dedup', 'lite', 'tooloutput', 'jsoncompact']),
+  standard: new Set(['dedup', 'lite', 'tooloutput', 'read-lifecycle', 'toolfilter', 'jsoncompact']),
   aggressive: new Set([
     'dedup',
     'lite',
+    'tooloutput',
     'read-lifecycle',
     'toolfilter',
     'jsoncompact',
