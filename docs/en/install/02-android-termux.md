@@ -34,7 +34,7 @@ node --version
 Then clone and start Free Rotation LLM Provider:
 
 ```bash
-git clone https://github.com/tashfeenahmed/freellmapi.git
+git clone https://github.com/lucaterribili/free-rotation-llm.git
 cd freellmapi
 npm install --no-audit --no-fund
 npm run dev

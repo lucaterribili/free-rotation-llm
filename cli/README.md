@@ -1,6 +1,6 @@
 # freellmapi
 
-Point your coding agent at a [Free Rotation LLM Provider](https://github.com/tashfeenahmed/freellmapi)
+Point your coding agent at a [Free Rotation LLM Provider](https://github.com/lucaterribili/free-rotation-llm)
 gateway in one command. The generators read the models your server is actually
 serving and write the config file each tool expects.
 
@@ -107,11 +107,11 @@ them into the child process environment for that run only.
 ## Requirements
 
 Node.js >= 20.18. A running Free Rotation LLM Provider gateway
-([install guide](https://github.com/tashfeenahmed/freellmapi/blob/main/docs/en/install/01-install.md)).
+([install guide](https://github.com/lucaterribili/free-rotation-llm/blob/main/docs/en/install/01-install.md)).
 
 ## Links
 
-- [Clients & coding agents guide](https://github.com/tashfeenahmed/freellmapi/blob/main/docs/en/clients/01-agent-clients.md)
-- [Issue tracker](https://github.com/tashfeenahmed/freellmapi/issues)
+- [Clients & coding agents guide](https://github.com/lucaterribili/free-rotation-llm/blob/main/docs/en/clients/01-agent-clients.md)
+- [Issue tracker](https://github.com/lucaterribili/free-rotation-llm/issues)
 
 MIT © Tashfeen Ahmed

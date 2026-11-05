@@ -6,12 +6,12 @@
 
 O'nlab provayderlarning bepul tariflarini, shuningdek, OpenAI bilan mos keladigan istalgan chat, embedding, rasm va audio endpointlaringizni bitta `/v1` API orqasida birlashtiring. Kalitlar shifrlangan holda saqlanadi. Router har bir so'rov uchun eng yaxshi mavjud modelni tanlaydi, provayder limitga yetganda keyingisiga o'tadi va har bir kalitning sarfini kuzatib boradi, shunda siz hech bir bepul tarif limitidan oshib ketmaysiz.
 
-[![CI](https://github.com/tashfeenahmed/freellmapi/actions/workflows/ci.yml/badge.svg)](https://github.com/tashfeenahmed/freellmapi/actions/workflows/ci.yml)
-[![GitHub stars](https://img.shields.io/github/stars/tashfeenahmed/freellmapi?style=flat&logo=github&color=yellow)](https://github.com/tashfeenahmed/freellmapi/stargazers)
+[![CI](https://github.com/lucaterribili/free-rotation-llm/actions/workflows/ci.yml/badge.svg)](https://github.com/lucaterribili/free-rotation-llm/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/lucaterribili/free-rotation-llm?style=flat&logo=github&color=yellow)](https://github.com/lucaterribili/free-rotation-llm/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#hissa-qoshish)
-[![Docker image](https://img.shields.io/badge/ghcr.io-freellmapi-2496ED?logo=docker&logoColor=white)](https://github.com/tashfeenahmed/freellmapi/pkgs/container/freellmapi)
-[![Ask DeepWiki](https://img.shields.io/badge/DeepWiki-Ask-blue)](https://deepwiki.com/tashfeenahmed/freellmapi)
+[![Docker image](https://img.shields.io/badge/ghcr.io-freellmapi-2496ED?logo=docker&logoColor=white)](https://github.com/lucaterribili/free-rotation-llm/pkgs/container/freellmapi)
+[![Ask DeepWiki](https://img.shields.io/badge/DeepWiki-Ask-blue)](https://deepwiki.com/lucaterribili/free-rotation-llm)
 
 **[freellmapi.co](https://freellmapi.co/?utm_source=github&utm_medium=readme&utm_campaign=repository&utm_content=readme_top)** · to'liq katalogni ko'ring: 474 ta model oilasi, 635 ta bepul endpoint
 
@@ -20,8 +20,8 @@ O'nlab provayderlarning bepul tariflarini, shuningdek, OpenAI bilan mos keladiga
 Bu tarjima ortda qolishi mumkin. Eng so'nggi ma'lumot uchun inglizcha README'ga qarang.
 
 <p align="center">
-  <a href="https://github.com/tashfeenahmed/freellmapi/releases/latest"><img src="repo-assets/badges/macos.svg" height="48" alt="Download for macOS"></a>
-  <a href="https://github.com/tashfeenahmed/freellmapi/releases/latest"><img src="repo-assets/badges/windows.svg" height="48" alt="Download for Windows"></a>
+  <a href="https://github.com/lucaterribili/free-rotation-llm/releases/latest"><img src="repo-assets/badges/macos.svg" height="48" alt="Download for macOS"></a>
+  <a href="https://github.com/lucaterribili/free-rotation-llm/releases/latest"><img src="repo-assets/badges/windows.svg" height="48" alt="Download for Windows"></a>
   <a href="docs/en/install/01-install.md#docker-compose"><img src="repo-assets/badges/docker.svg" height="48" alt="Self-host with Docker"></a>
   <a href="https://play.google.com/store/apps/details?id=co.freellmapi.app"><img src="repo-assets/badges/play-store.svg" height="48" alt="Get it on Google Play"></a>
   <a href="https://apps.apple.com/app/id6804648934"><img src="repo-assets/badges/app-store.svg" height="48" alt="Download on the App Store"></a>
@@ -174,7 +174,7 @@ bash'ga yuborishdan oldin o'qib chiqmoqchimisiz? [Skript shu yerda](https://free
 
 http://localhost:3001 ni oching, **Kalitlar** (Keys) sahifasida provayder kalitlaringizni qo'shing, **Fallback Chain** tartibini xohishingizga ko'ra o'zgartiring va **Kalitlar** sahifasining yuqori qismidan birlashtirilgan API kalitingizni oling. OpenAI SDK'ingizga aynan shu birlashtirilgan kalitni berasiz.
 
-Windows'da eng oson yo'l: quyida tasvirlangan desktop ilovaning **[Releases'dagi `.exe` o'rnatuvchisi](https://github.com/tashfeenahmed/freellmapi/releases/latest)**. Android uchun tajriba bosqichidagi [Termux qo'llanmasiga](docs/en/install/02-android-termux.md) qarang.
+Windows'da eng oson yo'l: quyida tasvirlangan desktop ilovaning **[Releases'dagi `.exe` o'rnatuvchisi](https://github.com/lucaterribili/free-rotation-llm/releases/latest)**. Android uchun tajriba bosqichidagi [Termux qo'llanmasiga](docs/en/install/02-android-termux.md) qarang.
 
 Qolgan hamma narsa (Docker Compose, lokal ishlab chiqish, deklarativ ishga tushirish konfiguratsiyasi, production build'lar, LAN orqali kirish va zaxira nusxalar) **[docs/en/install/01-install.md](docs/en/install/01-install.md)** da.
 
@@ -184,7 +184,7 @@ Qolgan hamma narsa (Docker Compose, lokal ishlab chiqish, deklarativ ishga tushi
 
 ![Free Rotation LLM Provider desktop ilovasi](repo-assets/desktop.png)
 
-**[Releases'dan yuklab oling](https://github.com/tashfeenahmed/freellmapi/releases/latest)**: har bir relizga macOS `.dmg` va Windows `.exe` o'rnatuvchisi biriktirilgan. Akkaunt yoki parol sozlash shart emas: sizga kerak bo'ladigan yagona maxfiy ma'lumot trey popoveridagi birlashtirilgan API kaliti. Manba koddan build qilish bosqichlari va ma'lumotlaringiz qayerda saqlanishi: [docs/en/install/01-install.md#desktop-app](docs/en/install/01-install.md#desktop-app).
+**[Releases'dan yuklab oling](https://github.com/lucaterribili/free-rotation-llm/releases/latest)**: har bir relizga macOS `.dmg` va Windows `.exe` o'rnatuvchisi biriktirilgan. Akkaunt yoki parol sozlash shart emas: sizga kerak bo'ladigan yagona maxfiy ma'lumot trey popoveridagi birlashtirilgan API kaliti. Manba koddan build qilish bosqichlari va ma'lumotlaringiz qayerda saqlanishi: [docs/en/install/01-install.md#desktop-app](docs/en/install/01-install.md#desktop-app).
 
 macOS 12 Monterey yoki undan yangi versiyalar uchun **arm64 (Apple Silicon)** yoki **x64 (Intel)** ni tanlang. Ikkala Mac build'i ZIP ko'rinishida ham yuklab olinadi.
 

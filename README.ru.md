@@ -6,12 +6,12 @@
 
 Объединяйте бесплатные тарифы десятков провайдеров, а также собственные OpenAI-совместимые эндпоинты для чата, эмбеддингов, генерации изображений и работы с аудио через единый API `/v1`. Ключи хранятся в зашифрованном виде. Маршрутизатор выбирает наиболее подходящую доступную модель, при ограничении запросов переключается на другого провайдера и учитывает расход по каждому ключу, помогая соблюдать бесплатные квоты.
 
-[![CI](https://github.com/tashfeenahmed/freellmapi/actions/workflows/ci.yml/badge.svg)](https://github.com/tashfeenahmed/freellmapi/actions/workflows/ci.yml)
-[![GitHub stars](https://img.shields.io/github/stars/tashfeenahmed/freellmapi?style=flat&logo=github&color=yellow)](https://github.com/tashfeenahmed/freellmapi/stargazers)
+[![CI](https://github.com/lucaterribili/free-rotation-llm/actions/workflows/ci.yml/badge.svg)](https://github.com/lucaterribili/free-rotation-llm/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/lucaterribili/free-rotation-llm?style=flat&logo=github&color=yellow)](https://github.com/lucaterribili/free-rotation-llm/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
-[![Docker image](https://img.shields.io/badge/ghcr.io-freellmapi-2496ED?logo=docker&logoColor=white)](https://github.com/tashfeenahmed/freellmapi/pkgs/container/freellmapi)
-[![Ask DeepWiki](https://img.shields.io/badge/DeepWiki-Ask-blue)](https://deepwiki.com/tashfeenahmed/freellmapi)
+[![Docker image](https://img.shields.io/badge/ghcr.io-freellmapi-2496ED?logo=docker&logoColor=white)](https://github.com/lucaterribili/free-rotation-llm/pkgs/container/freellmapi)
+[![Ask DeepWiki](https://img.shields.io/badge/DeepWiki-Ask-blue)](https://deepwiki.com/lucaterribili/free-rotation-llm)
 
 **[freellmapi.co](https://freellmapi.co/?utm_source=github&utm_medium=readme&utm_campaign=repository&utm_content=readme_top)** · полный каталог: 474 семейства моделей и 635 бесплатных эндпоинтов
 
@@ -20,8 +20,8 @@
 Русский перевод может обновляться с задержкой. Самую актуальную информацию смотрите в английском [README](README.md).
 
 <p align="center">
-  <a href="https://github.com/tashfeenahmed/freellmapi/releases/latest"><img src="repo-assets/badges/macos.svg" height="48" alt="Download for macOS"></a>
-  <a href="https://github.com/tashfeenahmed/freellmapi/releases/latest"><img src="repo-assets/badges/windows.svg" height="48" alt="Download for Windows"></a>
+  <a href="https://github.com/lucaterribili/free-rotation-llm/releases/latest"><img src="repo-assets/badges/macos.svg" height="48" alt="Download for macOS"></a>
+  <a href="https://github.com/lucaterribili/free-rotation-llm/releases/latest"><img src="repo-assets/badges/windows.svg" height="48" alt="Download for Windows"></a>
   <a href="docs/en/install/01-install.md#docker-compose"><img src="repo-assets/badges/docker.svg" height="48" alt="Self-host with Docker"></a>
   <a href="https://play.google.com/store/apps/details?id=co.freellmapi.app"><img src="repo-assets/badges/play-store.svg" height="48" alt="Get it on Google Play"></a>
   <a href="https://apps.apple.com/app/id6804648934"><img src="repo-assets/badges/app-store.svg" height="48" alt="Download on the App Store"></a>
@@ -175,7 +175,7 @@ curl -fsSL https://freellmapi.co/install.sh | bash
 
 Откройте http://localhost:3001, добавьте ключи провайдеров на странице **Keys**, настройте порядок **Fallback Chain** и скопируйте единый API-ключ из заголовка страницы **Keys**. Именно его следует указывать в OpenAI SDK.
 
-Для Windows проще всего скачать **[установщик `.exe` из Releases](https://github.com/tashfeenahmed/freellmapi/releases/latest)**. Для Android существует экспериментальное [руководство по Termux](docs/en/install/02-android-termux.md).
+Для Windows проще всего скачать **[установщик `.exe` из Releases](https://github.com/lucaterribili/free-rotation-llm/releases/latest)**. Для Android существует экспериментальное [руководство по Termux](docs/en/install/02-android-termux.md).
 
 Другие варианты, включая Docker Compose, локальную разработку, конфигурацию запуска, production-сборки, сетевой доступ и резервное копирование, описаны в **[руководстве по установке](docs/en/install/01-install.md)**.
 
@@ -185,7 +185,7 @@ curl -fsSL https://freellmapi.co/install.sh | bash
 
 ![Настольное приложение Free Rotation LLM Provider](repo-assets/desktop.png)
 
-**[Скачать из Releases](https://github.com/tashfeenahmed/freellmapi/releases/latest)**. К каждому выпуску прикладываются `.dmg` для macOS и `.exe` для Windows. Регистрация и отдельный пароль не требуются: необходим только единый API-ключ, доступный во всплывающем окне трея. Сборка из исходников и пути хранения данных: [docs/en/install/01-install.md#desktop-app](docs/en/install/01-install.md#desktop-app).
+**[Скачать из Releases](https://github.com/lucaterribili/free-rotation-llm/releases/latest)**. К каждому выпуску прикладываются `.dmg` для macOS и `.exe` для Windows. Регистрация и отдельный пароль не требуются: необходим только единый API-ключ, доступный во всплывающем окне трея. Сборка из исходников и пути хранения данных: [docs/en/install/01-install.md#desktop-app](docs/en/install/01-install.md#desktop-app).
 
 Для macOS 12 Monterey и новее выберите **arm64 (Apple Silicon)** или **x64 (Intel)**. Обе версии для Mac также доступны в ZIP.
 
