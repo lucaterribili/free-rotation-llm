@@ -1,0 +1,22 @@
+# Development image: toolchain only. The source is bind-mounted at runtime
+# (see docker-compose.dev.yml), so edits on the host reach the running
+# container immediately — server via `tsx watch`, dashboard via Vite HMR.
+ARG NODE_IMAGE=node:24.22.1-bookworm-slim
+FROM ${NODE_IMAGE}
+
+# better-sqlite3 falls back to compiling from source when no prebuilt binary
+# matches; keep the toolchain around for `npm ci` inside the container.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 make g++ ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Mount points for the per-workspace node_modules named volumes. Creating them
+# here, owned by `node` (uid 1000 = the usual host user), makes Docker seed the
+# volumes with that ownership so `npm ci` can write without root.
+RUN mkdir -p node_modules server/node_modules client/node_modules cli/node_modules shared/node_modules /data \
+  && chown -R node:node /app /data
+
+USER node
+EXPOSE 3001 5173

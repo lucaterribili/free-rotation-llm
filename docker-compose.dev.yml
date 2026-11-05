@@ -1,0 +1,78 @@
+# Dev container that REPLACES the stock freellmapi container while keeping
+# your edits live: the repo is bind-mounted into /app, the server restarts on
+# change (tsx watch) and the dashboard hot-reloads (Vite).
+#
+#   docker compose -f docker-compose.dev.yml up -d --build
+#   docker compose -f docker-compose.dev.yml logs -f
+#
+# API:        http://localhost:3001   (same port/URL as the original container)
+# Dashboard:  http://localhost:5173   (hot reload)
+#
+# Secrets live OUTSIDE git: .env.container (ENCRYPTION_KEY) and docker-data/
+# (the SQLite DB). Both are in .gitignore.
+name: freellmapi-dev
+
+services:
+  freellmapi:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    # Same uid as the host user so files written to bind mounts stay yours.
+    user: "${DEV_UID:-1000}:${DEV_GID:-1000}"
+    env_file:
+      - .env.container
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      HOST: 0.0.0.0
+      FREEAPI_DB_PATH: /data/freeapi.db
+    ports:
+      - "${HOST_BIND:-127.0.0.1}:3001:3001"
+      - "${HOST_BIND:-127.0.0.1}:5173:5173"
+    volumes:
+      - .:/app
+      - ./docker-data:/data
+      # Container-native dependencies (Linux/Node 24); never the host's.
+      - nm-root:/app/node_modules
+      - nm-server:/app/server/node_modules
+      - nm-client:/app/client/node_modules
+      - nm-cli:/app/cli/node_modules
+      - nm-shared:/app/shared/node_modules
+    # Reinstall only when package-lock.json changed since the last install.
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        want=$$(sha256sum package-lock.json | cut -d' ' -f1)
+        have=$$(cat node_modules/.lock-hash 2>/dev/null || true)
+        if [ "$$want" != "$$have" ]; then
+          npm ci
+          echo "$$want" > node_modules/.lock-hash
+        fi
+        # NODE_ENV=development never auto-migrates; apply pending migrations
+        # (idempotent) so the DB always matches the code before the server boots.
+        # New migrations you add are applied on the next container restart:
+        #   docker compose -f docker-compose.dev.yml restart
+        npm run db:migration:up -w server
+        exec npm run dev:lan
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/api/ping').then((res) => { if (!res.ok) process.exit(1); }).catch(() => process.exit(1));"
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 120s
+      retries: 5
+
+volumes:
+  nm-root:
+  nm-server:
+  nm-client:
+  nm-cli:
+  nm-shared:

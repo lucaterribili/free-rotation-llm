@@ -26,3 +26,7 @@ update-hermes.sh
 # Monetization planning — private, never committed
 monetization/
 .idea/
+personal-docs/
+# Docker dev container: copied production DB + its encryption key
+docker-data/
+.env.container
