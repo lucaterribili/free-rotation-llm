@@ -51,7 +51,7 @@ function Centered({ children }: { children: ReactNode }) {
   // dvh, not vh: on mobile the collapsing URL bar and the software keyboard both
   // change the viewport, and 100vh leaves the card parked mid-scroll.
   return (
-    <main className="min-h-dvh flex items-center justify-center bg-background px-4 py-10">
+    <main className="min-h-dvh flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">{children}</div>
     </main>
   )
