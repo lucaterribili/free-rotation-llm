@@ -16,7 +16,7 @@
 
 ## OpenAI-compatible clients
 
-Any client that can target an OpenAI-compatible base URL can use FreeLLMAPI:
+Any client that can target an OpenAI-compatible base URL can use Free Rotation LLM Provider:
 
 - **LangChain, LlamaIndex, official OpenAI SDKs**: set `base_url` to
   `http://localhost:3001/v1` and use the unified key from the dashboard.
@@ -298,24 +298,24 @@ editing them has no effect.
 ### QwenPaw
 
 [QwenPaw](https://github.com/agentscope-ai/QwenPaw) supports custom providers
-that use the OpenAI `chat.completions` API. Start FreeLLMAPI, create or copy a
+that use the OpenAI `chat.completions` API. Start Free Rotation LLM Provider, create or copy a
 unified key from its dashboard, then open **Settings → Models** in the QwenPaw
 Console:
 
 1. Under **Providers**, choose **Add Provider**.
 2. Give it a **Provider ID** such as `freellmapi` and a **Provider Name** such
-   as `FreeLLMAPI`, and set the API compatibility mode to OpenAI
+   as `Free Rotation LLM Provider`, and set the API compatibility mode to OpenAI
    `chat.completions`.
 3. Open the new provider's settings and set **Base URL** to
-   `http://localhost:3001/v1` and **API Key** to your FreeLLMAPI unified key.
+   `http://localhost:3001/v1` and **API Key** to your Free Rotation LLM Provider unified key.
 4. On the provider's models page, add a model. Use `auto` as the **Model ID**
-   to let FreeLLMAPI route the request, or copy a current id from
+   to let Free Rotation LLM Provider route the request, or copy a current id from
    `GET http://localhost:3001/v1/models`.
 5. Save, then pick the model as the default (or per chat) and send a test
    message.
 
 If QwenPaw runs in a container, `localhost` refers to that container rather
-than the host running FreeLLMAPI. Use a hostname or host-gateway address that
+than the host running Free Rotation LLM Provider. Use a hostname or host-gateway address that
 the QwenPaw container can reach, while keeping the `/v1` suffix. Do not put the
 unified key in a URL, screenshot, or issue report. See QwenPaw's
 [official model configuration guide](https://qwenpaw.agentscope.io/docs/models)
@@ -376,7 +376,7 @@ telemetry.
 ## MCP server
 
 On top of the OpenAI-compatible API, the router is an **MCP server**: agents can ask a
-FreeLLMAPI model to perform a text task and introspect the gateway mid-session (usable
+Free Rotation LLM Provider model to perform a text task and introspect the gateway mid-session (usable
 models and the params each one honors, provider health, usage and cache stats, routing
 strategy).
 
@@ -405,7 +405,7 @@ unified key as a Bearer token.
 
 ### ChatGPT (private Secure MCP Tunnel)
 
-`ask_freellmapi` makes FreeLLMAPI directly callable from a ChatGPT conversation. It uses
+`ask_freellmapi` makes Free Rotation LLM Provider directly callable from a ChatGPT conversation. It uses
 the same `/v1/chat/completions` implementation as every OpenAI-compatible client, so model
 routing, fallback, response caching, prompt compression, token accounting, execution ids,
 and redacted provider errors stay consistent. The result includes the answer, requested and
@@ -417,10 +417,10 @@ The three relevant settings are deliberately separate:
 | --- | --- | --- |
 | Base URL | `mcp.server_urls[].url` in tunnel-client | `http://127.0.0.1:3001/mcp` |
 | API key | `FREELLMAPI_MCP_AUTHORIZATION` environment variable | `Bearer freellmapi-...` |
-| Default model | FreeLLMAPI `MCP_INFERENCE_DEFAULT_MODEL` | `auto`, a model id, or `auto:<profile>` |
+| Default model | Free Rotation LLM Provider `MCP_INFERENCE_DEFAULT_MODEL` | `auto`, a model id, or `auto:<profile>` |
 
 1. Enable the MCP surface as shown above. Optionally set the default model before starting
-   FreeLLMAPI:
+   Free Rotation LLM Provider:
 
    ```bash
    MCP_INFERENCE_DEFAULT_MODEL=auto
@@ -429,19 +429,19 @@ The three relevant settings are deliberately separate:
 
 2. Copy [`examples/chatgpt/tunnel-client.yaml.example`](../../../examples/chatgpt/tunnel-client.yaml.example)
    outside the repository or into an ignored local file, replace its non-secret `tunnel_id`,
-   and provide both secrets only through the process environment. The FreeLLMAPI variable
+   and provide both secrets only through the process environment. The Free Rotation LLM Provider variable
    contains the complete HTTP header value, including `Bearer `:
 
    ```powershell
    $env:CONTROL_PLANE_API_KEY = '<OpenAI tunnel runtime key>'
-   $env:FREELLMAPI_MCP_AUTHORIZATION = 'Bearer <FreeLLMAPI unified key>'
+   $env:FREELLMAPI_MCP_AUTHORIZATION = 'Bearer <Free Rotation LLM Provider unified key>'
    tunnel-client doctor --profile-file .\tunnel-client.yaml --explain
    tunnel-client run --profile-file .\tunnel-client.yaml
    ```
 
    ```bash
    export CONTROL_PLANE_API_KEY='<OpenAI tunnel runtime key>'
-   export FREELLMAPI_MCP_AUTHORIZATION='Bearer <FreeLLMAPI unified key>'
+   export FREELLMAPI_MCP_AUTHORIZATION='Bearer <Free Rotation LLM Provider unified key>'
    tunnel-client doctor --profile-file ./tunnel-client.yaml --explain
    tunnel-client run --profile-file ./tunnel-client.yaml
    ```
@@ -451,22 +451,22 @@ The three relevant settings are deliberately separate:
    Review the discovered tools before saving. Start with `healthcheck`; use
    `ask_freellmapi` for inference and `list_models` when selecting an explicit model.
 
-The tunnel's static MCP headers are sent only to the configured FreeLLMAPI origin. Do not
+The tunnel's static MCP headers are sent only to the configured Free Rotation LLM Provider origin. Do not
 put either API key in the YAML file, MCP URL, screenshots, logs, or commits. A public plugin
 deployment is a different security model and needs a stable public HTTPS endpoint plus the
 authentication required by ChatGPT; the private tunnel above is the local-first path.
 
-FreeLLMAPI is local-first and single-user by design. Your provider keys stay in
+Free Rotation LLM Provider is local-first and single-user by design. Your provider keys stay in
 your SQLite database, encrypted at rest, and requests go from your machine to the
 upstream providers you enabled.
 
 ## VS Code ghost-text autocomplete (Continue)
 
-FreeLLMAPI exposes `/v1/completions` for editor autocomplete clients that send legacy OpenAI prompt/suffix requests. Example Continue config:
+Free Rotation LLM Provider exposes `/v1/completions` for editor autocomplete clients that send legacy OpenAI prompt/suffix requests. Example Continue config:
 
 ```yaml
 models:
-  - name: FreeLLMAPI Autocomplete
+  - name: Free Rotation LLM Provider Autocomplete
     provider: openai
     model: auto
     apiBase: http://localhost:3001/v1
@@ -478,10 +478,10 @@ models:
 
 ## Context Handoff
 
-When FreeLLMAPI falls over to a different model mid-conversation (quota, rate limit, cooldown), the new model has no idea it is picking up someone else's task. **Context handoff** adds a single compact `system` message to the outbound request that tells the new model exactly that:
+When Free Rotation LLM Provider falls over to a different model mid-conversation (quota, rate limit, cooldown), the new model has no idea it is picking up someone else's task. **Context handoff** adds a single compact `system` message to the outbound request that tells the new model exactly that:
 
 ```
-FreeLLMAPI context handoff:
+Free Rotation LLM Provider context handoff:
 You are taking over an ongoing conversation from another model (groq:llama-3 → google:gemini-flash).
 Continue the user's task using the conversation context already provided in this request.
 Do not restart the task, re-ask already answered setup questions, or discard prior tool results.
@@ -506,4 +506,4 @@ FREELLMAPI_CONTEXT_HANDOFF=on_model_switch
 - Session key: `X-Session-Id` header if present, otherwise SHA-1 of the first user message (same as sticky sessions).
 - Storage is in-memory only. Nothing is written to disk or logged.
 
-> **Important:** Context Handoff improves continuity for conversations routed through FreeLLMAPI. It cannot recover provider-internal hidden state or messages that were never sent to the proxy.
+> **Important:** Context Handoff improves continuity for conversations routed through Free Rotation LLM Provider. It cannot recover provider-internal hidden state or messages that were never sent to the proxy.

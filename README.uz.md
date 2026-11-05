@@ -1,6 +1,6 @@
 <div align="center">
 
-# FreeLLMAPI
+# Free Rotation LLM Provider
 
 **Oyiga 7,4 milliard token. 34 ta bepul LLM provayderi. 635 ta bepul model endpointi. OpenAI bilan mos bitta endpoint.**
 
@@ -27,7 +27,7 @@ Bu tarjima ortda qolishi mumkin. Eng so'nggi ma'lumot uchun inglizcha README'ga 
   <a href="https://apps.apple.com/app/id6804648934"><img src="repo-assets/badges/app-store.svg" height="48" alt="Download on the App Store"></a>
 </p>
 
-![FreeLLMAPI dashboard: oylik token hajmi ko'rsatilgan Modellar sahifasi](repo-assets/github-hero.png)
+![Free Rotation LLM Provider dashboard: oylik token hajmi ko'rsatilgan Modellar sahifasi](repo-assets/github-hero.png)
 
 Routeringiz model katalogini imzolangan manbadan o'zi yangilaydi: yangi bepul modellar, limit o'zgarishlari va moslik tuzatishlari `git pull` qilmasdan yetib keladi. Bepul o'rnatmalar oylik snapshotni oladi, ya'ni model jonli manbaga qo'shilganidan 30 kun o'tib ularga yetib boradi; premium routerlar uni o'sha kuniyoq oladi.
 **[freellmapi.co'da jonli manbaga ulaning](https://freellmapi.co/?utm_source=github&utm_medium=readme&utm_campaign=premium&utm_content=readme_top#pricing)** (yiliga $19, istalgan vaqtda bekor qilish mumkin).
@@ -62,9 +62,9 @@ Routeringiz model katalogini imzolangan manbadan o'zi yangilaydi: yangi bepul mo
 
 Bugun har bir jiddiy AI laboratoriyasi bepul tarif taklif qiladi: oyiga bir necha million token, kuniga bir necha ming so'rov. Alohida olinganda har bir tarif o'yinchoqdek gap. Lekin ularni birlashtirsangiz, oyiga taxminan **7,4 milliard token** ishchi inference quvvati hosil bo'ladi. Bu kichik va tezkor modellardan tortib ancha qobiliyatlilarigacha bo'lgan **474 ta model oilasi / 635 ta provayder endpointi**ni qamrab oladi.
 
-Muammo shundaki, ularni qo'lda birlashtirish juda og'ir: o'ttiz to'rtta turli SDK, o'ttiz to'rtta turli limit, so'rov xato berishi mumkin bo'lgan o'ttiz to'rtta joy. FreeLLMAPI bularning hammasini OpenAI bilan mos bitta endpointga jamlaydi. Istalgan OpenAI klient kutubxonasini lokal serveringizga yo'naltiring, u esa so'rovlarni siz kalit qo'shgan provayderlar bo'ylab sezdirmasdan taqsimlaydi.
+Muammo shundaki, ularni qo'lda birlashtirish juda og'ir: o'ttiz to'rtta turli SDK, o'ttiz to'rtta turli limit, so'rov xato berishi mumkin bo'lgan o'ttiz to'rtta joy. Free Rotation LLM Provider bularning hammasini OpenAI bilan mos bitta endpointga jamlaydi. Istalgan OpenAI klient kutubxonasini lokal serveringizga yo'naltiring, u esa so'rovlarni siz kalit qo'shgan provayderlar bo'ylab sezdirmasdan taqsimlaydi.
 
-Bundan tashqari, bepul tariflar manzarasi har hafta o'zgaradi: provayderlar ogohlantirmasdan model chiqaradi, eskilarini o'chiradi va limitlarni o'zgartiradi. FreeLLMAPI bularning barchasini siz uchun kuzatib boradi. Router imzolangan model katalogini [freellmapi.co](https://freellmapi.co) dan o'zi tortib oladi, shuning uchun o'rnatmangiz `git pull` qilmasdan ham dolzarb bo'lib turadi. Qanchalik tez yangilanishi haqida [Premium (jonli katalog)](#premium-jonli-katalog) bo'limida o'qing.
+Bundan tashqari, bepul tariflar manzarasi har hafta o'zgaradi: provayderlar ogohlantirmasdan model chiqaradi, eskilarini o'chiradi va limitlarni o'zgartiradi. Free Rotation LLM Provider bularning barchasini siz uchun kuzatib boradi. Router imzolangan model katalogini [freellmapi.co](https://freellmapi.co) dan o'zi tortib oladi, shuning uchun o'rnatmangiz `git pull` qilmasdan ham dolzarb bo'lib turadi. Qanchalik tez yangilanishi haqida [Premium (jonli katalog)](#premium-jonli-katalog) bo'limida o'qing.
 
 ![Bepul tariflar birlashtirilganda: 34 ta provayder bo'ylab oyiga ~7,4 mlrd token bepul inference](repo-assets/free-tier.png)
 
@@ -156,7 +156,7 @@ Ochiq hujjatlar asosida, 2026-yil iyul. Tuzatishlar mamnuniyat bilan qabul qilin
 - **Promptni siqish (ixtiyoriy)**: umumiy, xatoda so'rovni to'xtatmaydigan (fail-open) pipeline kesh tekshiruvi va routingdan oldin promptlardagi takrorlarni olib tashlashi, tool natijalarini filtrlashi, takrorlanuvchi JSON'ni ixchamlashi va eskirgan kontekstni qisqartirishi mumkin. [Batafsil →](docs/en/compression/01-compression-pipeline.md)
 - **Shifrlangan kalitlar, tashqariga bitta token**: provayder kalitlari SQLite'da AES-256-GCM bilan shifrlangan va har bir so'rovda faqat xotirada ochiladi. Ilovalaringiz faqat bitta birlashtirilgan `freellmapi-…` bearer tokenni ko'radi.
 - **Admin dashboard va analitika**: kalitlarni boshqarish, zanjirni qayta tartiblash, playground'da sinash va 24 soatdan 90 kungacha bo'lgan oraliqlarda p50/p95/TTFT analitikasini ko'rish uchun React interfeysi. Login bilan himoyalangan, qorong'i va yorug' mavzular, [60 ta til](#tillar).
-- **ChatGPT'ga tayyor MCP server va interaktiv hujjatlar**: ChatGPT va boshqa MCP klientlari `/mcp` orqali FreeLLMAPI inference'ini chaqirishi, foydalanish mumkin bo'lgan modellar ro'yxatini olishi, provayder holati, sarf, kesh va routing metama'lumotlarini ko'rishi hamda routing strategiyasini boshqarishi mumkin. Tashqi bog'liqliklarsiz OpenAPI ko'ruvchisi `/v1/docs` manzilida. [ChatGPT va kodlash agentlari →](docs/en/clients/01-agent-clients.md#mcp-server)
+- **ChatGPT'ga tayyor MCP server va interaktiv hujjatlar**: ChatGPT va boshqa MCP klientlari `/mcp` orqali Free Rotation LLM Provider inference'ini chaqirishi, foydalanish mumkin bo'lgan modellar ro'yxatini olishi, provayder holati, sarf, kesh va routing metama'lumotlarini ko'rishi hamda routing strategiyasini boshqarishi mumkin. Tashqi bog'liqliklarsiz OpenAPI ko'ruvchisi `/v1/docs` manzilida. [ChatGPT va kodlash agentlari →](docs/en/clients/01-agent-clients.md#mcp-server)
 - **Operatsion qulayliklar**: ixtiyoriy javob keshi, shifrlangan ma'lumotlar bazasi zaxiralari, kalitlarning muntazam holat tekshiruvi, kalitlarni ommaviy import/eksport qilish, deklarativ ishga tushirish konfiguratsiyasi. [O'rnatish va deploy →](docs/en/install/01-install.md)
 - **Node 20+ ishlaydigan har qanday joyda ishlaydi**: Windows, macOS, Linux serverlar yoki kichik ARM bir platali kompyuter (Raspberry Pi ham). PM2, systemd yoki o'zingiz yoqtirgan supervisor ostida bo'sh turganda ~40 MB RSS egallaydi.
 
@@ -182,7 +182,7 @@ Qolgan hamma narsa (Docker Compose, lokal ishlab chiqish, deklarativ ishga tushi
 
 [`desktop/`](./desktop) papkasida menyu panelida ishlaydigan nativ ilova bor: butun router va dashboard trey'dan turib lokal ishlaydi, shishasimon popover esa so'rovlar statistikasini jonli ko'rsatadi.
 
-![FreeLLMAPI desktop ilovasi](repo-assets/desktop.png)
+![Free Rotation LLM Provider desktop ilovasi](repo-assets/desktop.png)
 
 **[Releases'dan yuklab oling](https://github.com/tashfeenahmed/freellmapi/releases/latest)**: har bir relizga macOS `.dmg` va Windows `.exe` o'rnatuvchisi biriktirilgan. Akkaunt yoki parol sozlash shart emas: sizga kerak bo'ladigan yagona maxfiy ma'lumot trey popoveridagi birlashtirilgan API kaliti. Manba koddan build qilish bosqichlari va ma'lumotlaringiz qayerda saqlanishi: [docs/en/install/01-install.md#desktop-app](docs/en/install/01-install.md#desktop-app).
 
@@ -201,7 +201,7 @@ yoki MCP URL'da bo'lmasligi kerak. **[ChatGPT'ni sozlash →](docs/en/clients/01
 
 Provayder kalitlarini terminaldan ham boshqarish mumkin, buning uchun dashboard sessiya tokeni kerak (`FREELLMAPI_DASHBOARD_TOKEN` yoki `--token`): `npx freellmapi keys add|list|remove|test <platform>`, bunda `keys test` saqlangan kalitlarni qayta tekshiradi. [cli/README.md](cli/README.md#provider-keys) ga qarang.
 
-FreeLLMAPI ataylab lokal va bir foydalanuvchili qilib yaratilgan. Provayder kalitlaringiz SQLite bazangizda shifrlangan holda qoladi, so'rovlar esa sizning kompyuteringizdan to'g'ridan-to'g'ri siz yoqqan provayderlarga boradi.
+Free Rotation LLM Provider ataylab lokal va bir foydalanuvchili qilib yaratilgan. Provayder kalitlaringiz SQLite bazangizda shifrlangan holda qoladi, so'rovlar esa sizning kompyuteringizdan to'g'ridan-to'g'ri siz yoqqan provayderlarga boradi.
 
 ## Tillar
 
@@ -508,7 +508,7 @@ Hissa qo'shuvchilarni juda mamnuniyat bilan kutamiz! Ishlab chiqish jarayoni, PR
 
 ## Ogohlantirish
 
-**Bu loyiha production uchun emas, shaxsiy tajriba va o'rganish uchun.** Bepul tariflar dasturchilar ular ustida prototip yasashi uchun mavjud; ular barqaror, qo'llab-quvvatlanadigan inference asosi emas va shunday deb qaralmasligi kerak. Agar FreeLLMAPI ustida jiddiy biror narsa qursangiz, uni ishga tushirishdan oldin pullik API'ga o'ting. Har bir provayder bilan munosabatlaringiz akkaunt ochganingizda qabul qilgan shartlar bilan belgilanadi. Trafik ushbu loyiha orqali proksi qilinganda ham bu shartlar amal qiladi va ularga rioya qilish sizning zimmangizda.
+**Bu loyiha production uchun emas, shaxsiy tajriba va o'rganish uchun.** Bepul tariflar dasturchilar ular ustida prototip yasashi uchun mavjud; ular barqaror, qo'llab-quvvatlanadigan inference asosi emas va shunday deb qaralmasligi kerak. Agar Free Rotation LLM Provider ustida jiddiy biror narsa qursangiz, uni ishga tushirishdan oldin pullik API'ga o'ting. Har bir provayder bilan munosabatlaringiz akkaunt ochganingizda qabul qilgan shartlar bilan belgilanadi. Trafik ushbu loyiha orqali proksi qilinganda ham bu shartlar amal qiladi va ularga rioya qilish sizning zimmangizda.
 
 Har bir provayderning foydalanish shartlari shaxsiy, bir foydalanuvchili proksiga qanday qarashi 2026-yil may oyida provayderma-provayder ko'rib chiqilgan, natijalari [docs/en/architecture/00-high-level-index.md#terms-of-service-review](docs/en/architecture/00-high-level-index.md#terms-of-service-review) da.
 

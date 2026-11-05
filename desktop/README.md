@@ -1,4 +1,4 @@
-# FreeLLMAPI Desktop
+# Free Rotation LLM Provider Desktop
 
 Lean Electron menu-bar app for [freellmapi](https://github.com/tashfeenahmed/freellmapi):
 runs the whole router locally on `127.0.0.1:31415`, with a dark-glass tray

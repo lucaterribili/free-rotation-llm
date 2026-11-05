@@ -87,7 +87,7 @@ function codex(ctx: GenerateContext): Generation {
   const compact = Math.max(16_000, Math.floor(contextWindow(model) * 0.9));
   const providerTable = [
     '[model_providers.freellmapi]',
-    'name = "FreeLLMAPI"',
+    'name = "Free Rotation LLM Provider"',
     `base_url = ${JSON.stringify(v1Url(ctx.url))}`,
     'wire_api = "responses"',
     'env_key = "FREELLMAPI_API_KEY"',
@@ -178,11 +178,11 @@ function continueDev(ctx: GenerateContext): Generation {
       format: 'yaml',
       content: [
         '# freellmapi:start',
-        'name: FreeLLMAPI',
+        'name: Free Rotation LLM Provider',
         'version: 1.0.0',
         'schema: v1',
         'models:',
-        '  - name: FreeLLMAPI',
+        '  - name: Free Rotation LLM Provider',
         '    provider: openai',
         `    model: ${yamlString(model.id)}`,
         `    apiBase: ${yamlString(v1Url(ctx.url))}`,
@@ -260,7 +260,7 @@ function opencode(ctx: GenerateContext): Generation {
         provider: {
           freellmapi: {
             npm: '@ai-sdk/openai-compatible',
-            name: 'FreeLLMAPI',
+            name: 'Free Rotation LLM Provider',
             options: {
               baseURL: v1Url(ctx.url),
               apiKey: '{env:FREELLMAPI_API_KEY}',
@@ -300,8 +300,8 @@ function goose(ctx: GenerateContext): Generation {
         value: {
           name: 'freellmapi',
           engine: 'openai',
-          display_name: 'FreeLLMAPI',
-          description: 'FreeLLMAPI OpenAI-compatible gateway',
+          display_name: 'Free Rotation LLM Provider',
+          description: 'Free Rotation LLM Provider OpenAI-compatible gateway',
           api_key_env: 'FREELLMAPI_API_KEY',
           base_url: v1Url(ctx.url),
           models,
@@ -525,7 +525,7 @@ function crush(ctx: GenerateContext): Generation {
         },
         providers: {
           freellmapi: {
-            name: 'FreeLLMAPI',
+            name: 'Free Rotation LLM Provider',
             type: 'openai-compat',
             base_url: v1Url(ctx.url),
             api_key: '$FREELLMAPI_API_KEY',
@@ -579,7 +579,7 @@ function dsh(ctx: GenerateContext): Generation {
           'llm-pi-ai': {
             providers: {
               [route]: {
-                displayName: ctx.profile === 'default' ? 'FreeLLMAPI' : `FreeLLMAPI (${ctx.profile})`,
+                displayName: ctx.profile === 'default' ? 'Free Rotation LLM Provider' : `Free Rotation LLM Provider (${ctx.profile})`,
                 apiKeyEnv: 'FREELLMAPI_API_KEY',
                 api: 'openai-completions',
                 baseURL: v1Url(ctx.url),
@@ -663,7 +663,7 @@ function mimo(ctx: GenerateContext): Generation {
         provider: {
           freellmapi: {
             npm: '@ai-sdk/openai-compatible',
-            name: 'FreeLLMAPI',
+            name: 'Free Rotation LLM Provider',
             options: {
               baseURL: v1Url(ctx.url),
               apiKey: '{env:FREELLMAPI_API_KEY}',
@@ -809,7 +809,7 @@ function hermes(ctx: GenerateContext): Generation {
     : {
       providers: {
         [provider]: {
-          name: `FreeLLMAPI (${ctx.profile})`,
+          name: `Free Rotation LLM Provider (${ctx.profile})`,
           api: v1Url(ctx.url),
           api_key: '${FREELLMAPI_API_KEY}',
           transport: 'chat_completions',
@@ -878,7 +878,7 @@ function pi(ctx: GenerateContext): Generation {
     value: {
       providers: {
         [provider]: {
-          name: ctx.profile === 'default' ? 'FreeLLMAPI' : `FreeLLMAPI (${ctx.profile})`,
+          name: ctx.profile === 'default' ? 'Free Rotation LLM Provider' : `Free Rotation LLM Provider (${ctx.profile})`,
           baseUrl: v1Url(ctx.url),
           api: 'openai-completions',
           apiKey: ctx.apiKey,
@@ -948,7 +948,7 @@ function reasonix(ctx: GenerateContext): Generation {
           ...(ctx.profile === 'default' ? [`default_model = ${JSON.stringify(`${provider}/${model.id}`)}`, ''] : []),
           '[[providers]]',
           `name = ${JSON.stringify(provider)}`,
-          `display_name = ${JSON.stringify(ctx.profile === 'default' ? 'FreeLLMAPI' : `FreeLLMAPI (${ctx.profile})`)}`,
+          `display_name = ${JSON.stringify(ctx.profile === 'default' ? 'Free Rotation LLM Provider' : `Free Rotation LLM Provider (${ctx.profile})`)}`,
           'kind = "openai"',
           `base_url = ${JSON.stringify(v1Url(ctx.url))}`,
           `models = [${models.map(id => JSON.stringify(id)).join(', ')}]`,
@@ -1022,7 +1022,7 @@ function zcode(ctx: GenerateContext): Generation {
             providerRules: [{
               providerId: provider,
               templateId: null,
-              providerName: ctx.profile === 'default' ? 'FreeLLMAPI' : `FreeLLMAPI (${ctx.profile})`,
+              providerName: ctx.profile === 'default' ? 'Free Rotation LLM Provider' : `Free Rotation LLM Provider (${ctx.profile})`,
               enabled: true,
               config: {
                 group: 'standard-personal',

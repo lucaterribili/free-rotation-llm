@@ -184,7 +184,7 @@ function mergeContinueYaml(existing: string, generated: string): string {
   const entryStart = lines.findIndex(
     (line, index) => index > modelsIndex
       && index < modelsEnd
-      && /^\s{2}-\s+name:\s+["']?FreeLLMAPI["']?\s*$/.test(line),
+      && /^\s{2}-\s+name:\s+["']?Free Rotation LLM Provider["']?\s*$/.test(line),
   );
   if (entryStart >= 0) {
     let entryEnd = entryStart + 1;
@@ -204,7 +204,7 @@ function mergeContinueYaml(existing: string, generated: string): string {
 }
 
 function mergeYaml(existing: string, generated: string): string {
-  if (/^name: FreeLLMAPI$/m.test(generated) && /^models:$/m.test(generated)) {
+  if (/^name: Free Rotation LLM Provider$/m.test(generated) && /^models:$/m.test(generated)) {
     const withoutOldBlock = existing.replace(markerPattern(), '').trimEnd();
     return mergeContinueYaml(withoutOldBlock, generated);
   }

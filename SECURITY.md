@@ -1,6 +1,6 @@
 # Security Policy
 
-FreeLLMAPI holds real credentials: your provider API keys (encrypted at rest in
+Free Rotation LLM Provider holds real credentials: your provider API keys (encrypted at rest in
 SQLite), a unified `/v1` bearer token, and a dashboard account. Bugs that expose
 any of those are taken seriously. Thanks for reporting them responsibly.
 
@@ -67,7 +67,7 @@ Out of scope:
 - Vulnerabilities in upstream LLM providers themselves. Report those to the
   provider. Bugs in *how this router talks to them* are in scope.
 - Anything that requires the operator to deliberately expose the server to the
-  public internet. FreeLLMAPI is a single-user, trusted-network tool: it binds
+  public internet. Free Rotation LLM Provider is a single-user, trusted-network tool: it binds
   `127.0.0.1` by default, `HOST_BIND=0.0.0.0` is a documented opt-in with a
   warning attached, and there is no multi-tenant auth by design. "I put it on a
   public IP and someone used my quota" is expected behaviour, not a vulnerability.

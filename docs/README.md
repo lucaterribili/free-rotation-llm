@@ -1,4 +1,4 @@
-# FreeLLMAPI documentation
+# Free Rotation LLM Provider documentation
 
 Pick a language:
 

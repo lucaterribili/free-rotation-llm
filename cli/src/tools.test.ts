@@ -180,7 +180,7 @@ describe('tool generators', () => {
   it('generates a complete Continue v1 config with Agent tool support', () => {
     const config = tools.find(tool => tool.id === 'continue')!
       .generate(context).files[0].content!;
-    expect(config).toContain('name: FreeLLMAPI');
+    expect(config).toContain('name: Free Rotation LLM Provider');
     expect(config).toContain('version: 1.0.0');
     expect(config).toContain('schema: v1');
     expect(config).toContain('      - tool_use');
@@ -524,7 +524,7 @@ describe('tool generators', () => {
     expect(models.sensitive).toBe(true);
     const provider = (models.value as { providers: Record<string, any> }).providers.freellmapi;
     expect(provider).toMatchObject({
-      name: 'FreeLLMAPI',
+      name: 'Free Rotation LLM Provider',
       baseUrl: 'http://localhost:3000/v1',
       api: 'openai-completions',
       apiKey: 'freellmapi-test-key',
@@ -563,7 +563,7 @@ describe('tool generators', () => {
     expect(asPosix(files[0].path)).toBe('/srv/pi/models.json');
     const providers = (files[0].value as { providers: Record<string, { name: string }> }).providers;
     expect(Object.keys(providers)).toEqual(['freellmapi-work-box']);
-    expect(providers['freellmapi-work-box'].name).toBe('FreeLLMAPI (Work Box)');
+    expect(providers['freellmapi-work-box'].name).toBe('Free Rotation LLM Provider (Work Box)');
   });
 
   it('writes Reasonix as a [[providers]] entry plus its key in the Reasonix .env', () => {
@@ -611,7 +611,7 @@ describe('tool generators', () => {
     expect(config.content).not.toContain('default_model');
     expect(config.content!.split('\n')[0]).toBe('[[providers]]');
     expect(config.content).toContain('name = "freellmapi-work-box"');
-    expect(config.content).toContain('display_name = "FreeLLMAPI (Work Box)"');
+    expect(config.content).toContain('display_name = "Free Rotation LLM Provider (Work Box)"');
   });
 
   it('writes ZCode as a custom provider in ~/.zcode/v2/provider_config.json', () => {
@@ -639,7 +639,7 @@ describe('tool generators', () => {
     expect(value.schemaVersion).toBe(1);
     const [provider] = value.config.providerConfigRules.providerRules;
     expect(provider.providerId).toBe('freellmapi');
-    expect(provider.providerName).toBe('FreeLLMAPI');
+    expect(provider.providerName).toBe('Free Rotation LLM Provider');
     expect(provider.config.access).toEqual({ type: 'api-key', apiKey: 'freellmapi-test-key' });
     expect(provider.config.api).toEqual({ type: 'openai-chat-completions', baseUrl: 'http://localhost:3000/v1' });
     expect(provider.config.personalModelIds).toEqual(['fast-coder', 'reasoning-model']);
@@ -664,7 +664,7 @@ describe('tool generators', () => {
     const value = config.value as { config: { providerConfigRules: { providerRules: { providerId: string; providerName: string }[] } } };
     const [provider] = value.config.providerConfigRules.providerRules;
     expect(provider.providerId).toBe('freellmapi-work-box');
-    expect(provider.providerName).toBe('FreeLLMAPI (Work Box)');
+    expect(provider.providerName).toBe('Free Rotation LLM Provider (Work Box)');
   });
 
   it('writes AtomCode account and model tables with a root default_model', () => {

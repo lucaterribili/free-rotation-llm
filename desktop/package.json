@@ -1,7 +1,7 @@
 {
   "name": "freellmapi-desktop",
   "version": "0.16.19",
-  "description": "FreeLLMAPI menu-bar app — local OpenAI-compatible LLM router",
+  "description": "Free Rotation LLM Provider menu-bar app — local OpenAI-compatible LLM router",
   "author": {
     "name": "tashfeenahmed",
     "email": "tashfene@gmail.com",

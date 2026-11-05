@@ -4,7 +4,7 @@
 
 [← 返回 README](../README.md) · [文档索引](../README.md)
 
-把 FreeLLMAPI 跑起来所需的一切：一行命令、Docker Compose、本地开发、声明式配置、生产构建、桌面应用，以及你的数据存放在哪里。
+把 Free Rotation LLM Provider 跑起来所需的一切：一行命令、Docker Compose、本地开发、声明式配置、生产构建、桌面应用，以及你的数据存放在哪里。
 
 - [快速开始](#快速开始)
 - [Docker Compose](#docker-compose)
@@ -72,7 +72,7 @@ docker compose up -d
 
 > **宿主机连得上提供方，容器里却连不上？** 容器有自己独立的网络栈，所以有两件在你机器上成立的事，到了容器里并不成立：
 >
-> - **`127.0.0.1` 在容器里指的是容器自己，不是你的机器。** 如果你是通过宿主机上的代理客户端（Clash、v2rayN、sing-box，或公司代理）访问提供方，请把 FreeLLMAPI 指向宿主机：`PROXY_URL=socks5h://host.docker.internal:7890`。仓库自带的 `docker-compose.yml` 已经把 `host.docker.internal` 映射到宿主网关，所以在 Linux 上的原生 Docker 里同样可用，不只是 Docker Desktop。另外代理本身也要允许来自 loopback 以外的连接（Clash 里是 `allow-lan: true`）。
+> - **`127.0.0.1` 在容器里指的是容器自己，不是你的机器。** 如果你是通过宿主机上的代理客户端（Clash、v2rayN、sing-box，或公司代理）访问提供方，请把 Free Rotation LLM Provider 指向宿主机：`PROXY_URL=socks5h://host.docker.internal:7890`。仓库自带的 `docker-compose.yml` 已经把 `host.docker.internal` 映射到宿主网关，所以在 Linux 上的原生 Docker 里同样可用，不只是 Docker Desktop。另外代理本身也要允许来自 loopback 以外的连接（Clash 里是 `allow-lan: true`）。
 > - **纯 IPv6 的宿主机需要在 Docker 里开启 IPv6。** 默认的 bridge 网络只有 IPv4，所以在没有 IPv4 出口的宿主机上，容器什么都连不上，连 DNS 也一样。在 `/etc/docker/daemon.json` 里加上 `"ipv6": true`、`"ip6tables": true` 和一个 `"fixed-cidr-v6"` 网段，然后重启 Docker。
 >
 > 想知道自己属于哪一种，直接问容器：
@@ -143,7 +143,7 @@ node server/dist/index.js     # 服务和仪表盘都在 :3001 上提供
 
 ## 声明式启动配置
 
-为了让 Docker 或服务器安装可以重复复现，FreeLLMAPI 支持在每次启动时应用一份 JSON 配置。设置 `FREEAPI_CONFIG_PATH=/path/to/freellmapi.config.json`，或者把同样的 JSON 放进 `FREEAPI_CONFIG_JSON`。这份配置是幂等的：已存在的密钥、自定义提供方、模型改动、回退链条目和路由设置会被更新，而不是重复添加。
+为了让 Docker 或服务器安装可以重复复现，Free Rotation LLM Provider 支持在每次启动时应用一份 JSON 配置。设置 `FREEAPI_CONFIG_PATH=/path/to/freellmapi.config.json`，或者把同样的 JSON 放进 `FREEAPI_CONFIG_JSON`。这份配置是幂等的：已存在的密钥、自定义提供方、模型改动、回退链条目和路由设置会被更新，而不是重复添加。
 
 ```json
 {
@@ -185,7 +185,7 @@ node server/dist/index.js     # 服务和仪表盘都在 :3001 上提供
 
 ## Docker 镜像与运维
 
-FreeLLMAPI 发布一个生产镜像，里面包含 Express 服务和构建好的 React 仪表盘：
+Free Rotation LLM Provider 发布一个生产镜像，里面包含 Express 服务和构建好的 React 仪表盘：
 
 ```bash
 docker pull ghcr.io/tashfeenahmed/freellmapi:latest   # 也可以固定到某个版本，例如 :v1.2.3
@@ -225,7 +225,7 @@ FREEAPI_DB_BACKUP_KEY=64-char-hex-backup-key
 FREEAPI_DB_BACKUP_INTERVAL_MS=300000
 ```
 
-启动时如果数据库文件不存在，FreeLLMAPI 会先恢复备份，再执行迁移。服务运行期间，它会定期上传一份新的加密备份。如果没有设置 `FREEAPI_DB_BACKUP_KEY`，备份信封也会使用 `ENCRYPTION_KEY`。
+启动时如果数据库文件不存在，Free Rotation LLM Provider 会先恢复备份，再执行迁移。服务运行期间，它会定期上传一份新的加密备份。如果没有设置 `FREEAPI_DB_BACKUP_KEY`，备份信封也会使用 `ENCRYPTION_KEY`。
 
 更多 Docker 运维内容和示例在 [docker/README.md](../../../docker/README.md)。
 
@@ -233,7 +233,7 @@ FREEAPI_DB_BACKUP_INTERVAL_MS=300000
 
 [`desktop/`](../../../desktop) 里有一个原生的菜单栏应用：整个路由器加仪表盘就在你的托盘里本地运行，还有一个玻璃质感的悬浮窗显示实时请求统计。
 
-![FreeLLMAPI 桌面应用](../../../repo-assets/desktop.png)
+![Free Rotation LLM Provider 桌面应用](../../../repo-assets/desktop.png)
 
 **[从 Releases 下载](https://github.com/tashfeenahmed/freellmapi/releases/latest)** —— macOS 的 `.dmg` 和 Windows 的 `.exe` 安装包由 [`desktop-release`](../../../.github/workflows/desktop-release.yml) 工作流在每个版本发布时构建并附带。你也可以花几分钟从本仓库自己构建：
 

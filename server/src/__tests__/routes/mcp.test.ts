@@ -232,7 +232,7 @@ describe('MCP server (/mcp, stateless Streamable HTTP)', () => {
     });
     expect(body.error).toBeUndefined();
     expect(body.result.isError).toBe(true);
-    expect(body.result.content[0].text).toContain('FreeLLMAPI inference failed (404)');
+    expect(body.result.content[0].text).toContain('Free Rotation LLM Provider inference failed (404)');
     expect(body.result.content[0].text).toContain('definitely-not-a-real-model');
     expect(body.result.content[0].text).toContain('is not in the catalog');
   });
@@ -256,7 +256,7 @@ describe('MCP server (/mcp, stateless Streamable HTTP)', () => {
           model: 'openai/gpt-oss-120b',
           choices: [{
             index: 0,
-            message: { role: 'assistant', content: 'FreeLLMAPI answered from ChatGPT.' },
+            message: { role: 'assistant', content: 'Free Rotation LLM Provider answered from ChatGPT.' },
             finish_reason: 'stop',
           }],
           usage: { prompt_tokens: 9, completion_tokens: 6, total_tokens: 15 },
@@ -270,7 +270,7 @@ describe('MCP server (/mcp, stateless Streamable HTTP)', () => {
         jsonrpc: '2.0', id: 71, method: 'tools/call',
         params: {
           name: 'ask_freellmapi',
-          arguments: { prompt: 'Answer this through FreeLLMAPI.', temperature: 0, max_tokens: 64 },
+          arguments: { prompt: 'Answer this through Free Rotation LLM Provider.', temperature: 0, max_tokens: 64 },
         },
       });
 
@@ -278,7 +278,7 @@ describe('MCP server (/mcp, stateless Streamable HTTP)', () => {
       const data = toolResultJson(body);
       expect(body.result.structuredContent).toEqual(data);
       expect(data).toMatchObject({
-        answer: 'FreeLLMAPI answered from ChatGPT.',
+        answer: 'Free Rotation LLM Provider answered from ChatGPT.',
         requested_model: 'auto',
         finish_reason: 'stop',
         usage: { prompt_tokens: 9, completion_tokens: 6, total_tokens: 15 },

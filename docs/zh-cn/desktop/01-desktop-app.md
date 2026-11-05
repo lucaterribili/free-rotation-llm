@@ -50,7 +50,7 @@ bundle:server → build:main / build:preload → stage:client → electron-build
 
 ## 托盘 / 悬浮窗 / 窗口
 
-- `desktop/src/tray.ts` —— 菜单栏图标、`打开日志文件夹` / `打开备份文件夹`（`logger.ts:openLogsFolder`/`openBackupsFolder` 经 `shell.openPath`）、`打开 FreeLLMAPI`、退出。
+- `desktop/src/tray.ts` —— 菜单栏图标、`打开日志文件夹` / `打开备份文件夹`（`logger.ts:openLogsFolder`/`openBackupsFolder` 经 `shell.openPath`）、`打开 Free Rotation LLM Provider`、退出。
 - `desktop/src/popover.ts` —— 用于快捷访问的悬浮窗。
 - `desktop/src/window.ts` —— 主 BrowserWindow 外观。
 

@@ -414,7 +414,7 @@ export function getProxyMode(): ProxyMode {
   return _proxyMode;
 }
 
-/** Set the bearer token used only to authenticate FreeLLMAPI to a Fetch Relay.
+/** Set the bearer token used only to authenticate Free Rotation LLM Provider to a Fetch Relay.
  * The environment wins so headless deployments never expose or overwrite it
  * through the dashboard. This token is separate from the provider's
  * Authorization header, which is preserved for the upstream request. */

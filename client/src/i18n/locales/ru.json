@@ -60,7 +60,7 @@
     "emailChanged": "E-mail успешно изменён.",
     "passwordReset": "Пароль сброшен. Войдите заново.",
     "resetCodeDockerHint": "Используете Docker? Код находится в логе контейнера: docker logs <container>.",
-    "desktopSessionFailed": "Панель управления не смогла войти на локальный сервер. Закройте FreeLLMAPI и откройте его снова."
+    "desktopSessionFailed": "Панель управления не смогла войти на локальный сервер. Закройте Free Rotation LLM Provider и откройте его снова."
   },
   "common": {
     "save": "Сохранить",
@@ -160,16 +160,16 @@
     "notGitInstall": "Эта установка не содержит сведений о коммите.",
     "checkFailed": "Не удалось проверить наличие обновлений.",
     "autoUpdateCheck": "Автоматическая проверка обновлений",
-    "restartAfterUpdate": "Перезапустите FreeLLMAPI после завершения сборки.",
+    "restartAfterUpdate": "Перезапустите Free Rotation LLM Provider после завершения сборки.",
     "downloadUpdate": "Скачать обновление",
     "downloadingUpdate": "Загрузка… {percent}%",
     "restartToUpdate": "Перезапустить для обновления",
-    "updateReadyHint": "Загружено. FreeLLMAPI создаёт резервную копию данных, перезапускается и открывает новую версию.",
+    "updateReadyHint": "Загружено. Free Rotation LLM Provider создаёт резервную копию данных, перезапускается и открывает новую версию.",
     "updateInstallFailed": "Не удалось установить обновление.",
     "updateNow": "Обновить сейчас",
-    "updatingContainer": "Загружается новый образ и выполняется перезапуск. Страница перезагрузится, когда FreeLLMAPI вернётся.",
+    "updatingContainer": "Загружается новый образ и выполняется перезапуск. Страница перезагрузится, когда Free Rotation LLM Provider вернётся.",
     "updateNowFailed": "Служба обновления не приняла запрос. Проверьте, что контейнер watchtower запущен.",
-    "updateNowTimeout": "FreeLLMAPI не перезапустился за 5 минут. Проверьте журналы контейнера watchtower."
+    "updateNowTimeout": "Free Rotation LLM Provider не перезапустился за 5 минут. Проверьте журналы контейнера watchtower."
   },
   "models": {
     "title": "Модели",
@@ -192,7 +192,7 @@
     "monthlyTokenBudget": "Ежемесячный бюджет токенов",
     "remaining": "оставшееся",
     "used": "использованный",
-    "usedScopeHint": "Только чат-запросы с начала текущего календарного месяца, суммарно по всем моделям активной цепочки, включая пользовательские эндпоинты. Трафик, отправленный провайдеру в обход FreeLLMAPI, не учитывается.",
+    "usedScopeHint": "Только чат-запросы с начала текущего календарного месяца, суммарно по всем моделям активной цепочки, включая пользовательские эндпоинты. Трафик, отправленный провайдеру в обход Free Rotation LLM Provider, не учитывается.",
     "legendRemainingTitle": "Остаток / месячный бюджет для {name} ({platform})",
     "noPublishedQuota": "+{count} без опубликованной квоты",
     "noPublishedQuotaTitle": "У этих моделей нет задокументированного месячного бюджета токенов, поэтому остаток показать нечем.",
@@ -1212,7 +1212,7 @@
   "update": {
     "available": "New version available",
     "dismiss": "Dismiss",
-    "newBuild": "Установлена более новая версия FreeLLMAPI.",
+    "newBuild": "Установлена более новая версия Free Rotation LLM Provider.",
     "reload": "Перезагрузить"
   },
   "freeTier": {

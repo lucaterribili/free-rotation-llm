@@ -50,7 +50,7 @@ Deliberately NOT mirrored: `restoreDbBackupIfNeeded`/`startDbBackupPump` (`FREEA
 
 ## Tray / popover / window
 
-- `desktop/src/tray.ts` — menu-bar icon, `Open Logs Folder` / `Open Backups Folder` (`logger.ts:openLogsFolder`/`openBackupsFolder` via `shell.openPath`), `Open FreeLLMAPI`, quit.
+- `desktop/src/tray.ts` — menu-bar icon, `Open Logs Folder` / `Open Backups Folder` (`logger.ts:openLogsFolder`/`openBackupsFolder` via `shell.openPath`), `Open Free Rotation LLM Provider`, quit.
 - `desktop/src/popover.ts` — popover window for quick access.
 - `desktop/src/window.ts` — main BrowserWindow chrome.
 

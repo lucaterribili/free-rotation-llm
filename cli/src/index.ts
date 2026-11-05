@@ -140,7 +140,7 @@ async function promptForKey(provider = false): Promise<string> {
   rl.on('SIGINT', cancel);
   rl.on('close', cancel);
   try {
-    const answer = rl.question(provider ? 'Provider API key: ' : 'FreeLLMAPI unified API key: ', {
+    const answer = rl.question(provider ? 'Provider API key: ' : 'Free Rotation LLM Provider unified API key: ', {
       signal: controller.signal,
     });
     muted = true;
@@ -173,7 +173,7 @@ async function catalog(url: string, apiKey: string, availableOnly = true): Promi
       : undefined;
     const reason = cause ?? (error instanceof Error ? error.message : String(error));
     throw new Error(
-      `Could not reach the FreeLLMAPI gateway at ${rootUrl(url)} (${reason}). `
+      `Could not reach the Free Rotation LLM Provider gateway at ${rootUrl(url)} (${reason}). `
       + 'Check that the server is running, or point the CLI at it with --url or FREELLMAPI_URL.',
     );
   }
@@ -262,7 +262,7 @@ export function resolvePinnedModel(
 
 function help(): string {
   return [
-    'FreeLLMAPI coding-agent setup and provider key management',
+    'Free Rotation LLM Provider coding-agent setup and provider key management',
     '',
     'Usage:',
     '  freellmapi <command> [--url URL] [--api-key KEY] [--profile NAME] [--model ID] [--dry-run]',
@@ -419,7 +419,7 @@ export function codexArgs(url: string, selected: string): string[] {
   return [
     '-c', 'model_provider="freellmapi"',
     '-c', `model=${JSON.stringify(selected)}`,
-    '-c', 'model_providers.freellmapi.name="FreeLLMAPI"',
+    '-c', 'model_providers.freellmapi.name="Free Rotation LLM Provider"',
     '-c', `model_providers.freellmapi.base_url=${JSON.stringify(`${rootUrl(url)}/v1`)}`,
     '-c', 'model_providers.freellmapi.wire_api="responses"',
     '-c', 'model_providers.freellmapi.env_key="FREELLMAPI_API_KEY"',
