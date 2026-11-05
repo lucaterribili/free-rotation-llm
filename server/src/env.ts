@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { applyEnvAliases } from './lib/env-aliases.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -8,3 +9,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // inside a bundle) point at an explicit .env — or at nothing: dotenv silently
 // no-ops on a missing file either way.
 dotenv.config({ path: process.env.FREEAPI_ENV_PATH ?? path.resolve(__dirname, '../../.env') });
+
+// Accept FREE_ROTATION_LLM_* as an alias for every FREELLMAPI_* variable (.env included).
+applyEnvAliases();

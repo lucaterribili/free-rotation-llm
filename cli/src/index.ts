@@ -48,11 +48,16 @@ function parseTimeout(value: string): number {
   return ms;
 }
 
+/** Reads FREE_ROTATION_LLM_<name>, falling back to the legacy FREELLMAPI_<name>. */
+function envVar(name: string): string | undefined {
+  return process.env[`FREE_ROTATION_LLM_${name}`] || process.env[`FREELLMAPI_${name}`];
+}
+
 export function parseArgs(argv: string[]): { command?: string; options: CliOptions } {
   const options: CliOptions = {
-    url: process.env.FREELLMAPI_URL || 'http://localhost:3001',
-    apiKey: process.env.FREELLMAPI_API_KEY,
-    token: process.env.FREELLMAPI_DASHBOARD_TOKEN,
+    url: envVar('URL') || 'http://localhost:3001',
+    apiKey: envVar('API_KEY'),
+    token: envVar('DASHBOARD_TOKEN'),
     profile: 'default',
     dryRun: false,
     args: [],
