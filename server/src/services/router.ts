@@ -41,6 +41,7 @@ import { customEndpointKeyIds } from './custom-endpoint.js';
 import { isDegraded } from './degradation.js';
 import { modelStatsKey, endpointScopeForBaseUrl } from '../lib/endpoint-scope.js';
 import { isToolBenched } from '../lib/tool-capability.js';
+import { recordRouteSkips } from '../lib/attempt-trace.js';
 import { parseModelScope, scopeAllows } from '../lib/model-scope.js';
 import { getKeyQuotaHeadroom, inferQuotaPoolKey } from './provider-quota.js';
 import type { BaseProvider } from '../providers/base.js';
@@ -511,7 +512,7 @@ export const EXPLORE_CHANCE = 0.1;
 /** A model counts as "has data" once its decay-weighted success+failure
  *  pseudo-count reaches this many samples. */
 export const EXPLORE_MIN_SAMPLES = 5;
-const VALID_STRATEGIES: RoutingStrategy[] = ['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision'];
+const VALID_STRATEGIES: RoutingStrategy[] = ['priority', 'primary-first', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision'];
 
 export function getRoutingStrategy(): RoutingStrategy {
   const raw = getSetting(STRATEGY_KEY);
@@ -525,6 +526,32 @@ export function setRoutingStrategy(strategy: RoutingStrategy): void {
     throw new Error(`Unknown routing strategy: ${strategy}`);
   }
   setSetting(STRATEGY_KEY, strategy);
+}
+
+// ── Sticky sessions (persisted) ─────────────────────────────────────────────
+// Whether a conversation may pin itself to the model that served its previous
+// turn. Default 'on' keeps the historical 30-minute affinity; 'off' disables
+// reading AND writing the pin; 'primary_only' only honors a pin that still
+// points at the chain's own primary, so a failover can never make a lower
+// model sticky. Under the 'primary-first' strategy the effective behaviour is
+// always 'off' or 'primary_only' — see stickyPreferenceForChain.
+export type StickySessionsMode = 'off' | 'on' | 'primary_only';
+const STICKY_SESSIONS_KEY = 'sticky_sessions';
+const VALID_STICKY_SESSIONS: StickySessionsMode[] = ['off', 'on', 'primary_only'];
+export const DEFAULT_STICKY_SESSIONS: StickySessionsMode = 'on';
+
+export function getStickySessionsMode(): StickySessionsMode {
+  const raw = getSetting(STICKY_SESSIONS_KEY);
+  return (raw && VALID_STICKY_SESSIONS.includes(raw as StickySessionsMode))
+    ? (raw as StickySessionsMode)
+    : DEFAULT_STICKY_SESSIONS;
+}
+
+export function setStickySessionsMode(mode: StickySessionsMode): void {
+  if (!VALID_STICKY_SESSIONS.includes(mode)) {
+    throw new Error(`Unknown sticky sessions mode: ${mode}`);
+  }
+  setSetting(STICKY_SESSIONS_KEY, mode);
 }
 
 // ── Exploration toggle (persisted) ─────────────────────────────────────────
@@ -751,7 +778,9 @@ export function setCommunityPriors(priors: CommunityPriorMap): number {
  *  `adjusted` is false, so nothing about routing moves with the clock.
  *  priority/custom are the operator's explicit choice and are never rewritten. */
 function weightsWithPeak(strategy: RoutingStrategy): { weights: RoutingWeights | null; adjusted: boolean } {
-  if (strategy === 'priority') return { weights: null, adjusted: false };
+  // 'primary-first' is a strict chain walk like 'priority': there is no weight
+  // vector, so no peak-hours or task bias can move the ranking.
+  if (strategy === 'priority' || strategy === 'primary-first') return { weights: null, adjusted: false };
   if (strategy === 'custom') return { weights: getCustomWeights(), adjusted: false };
   // 'decision' outside a picked request (display, fusion, background) scores
   // as Balanced, the same preset an unsure or unavailable decision falls to.
@@ -1209,6 +1238,17 @@ function orderChain(chain: ChainRow[], strategy: RoutingStrategy, sampled = true
   const tier = (e: ChainRow) => e.match_tier ?? 0;
   let weights = weightsFor(strategy);
   if (!weights) {
+    // Strict manual order with NO penalty and NO soft-score movement: the chain
+    // is walked exactly as the operator arranged it. Lower entries serve only
+    // for the single request whose primary failed or is behind a hard gate;
+    // the next request starts here again. Tier still dominates (it is the
+    // group-resolution safety net), then manual priority, then insertion.
+    if (strategy === 'primary-first') {
+      return chain
+        .map((e, i) => ({ e, i }))
+        .sort((a, b) => tier(a.e) - tier(b.e) || a.e.priority - b.e.priority || a.i - b.i)
+        .map(x => x.e);
+    }
     // Legacy priority mode: manual chain order + the 429/failure penalty,
     // ascending.
     //
@@ -2197,7 +2237,10 @@ export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, pre
   // with governs — the operator's setting, or the preset the 'decision' model
   // picked (#1354).
   const strategy = strategyOverride ?? effectiveRoutingStrategy();
-  if (strategy !== 'priority') refreshStatsCache(db);
+  // Strict strategies walk the manual order and never consult the bandit, so
+  // there is no stats refresh and no exploration draw to make.
+  const strictOrder = strategy === 'priority' || strategy === 'primary-first';
+  if (!strictOrder) refreshStatsCache(db);
 
   const chain = (prefetchedChain ?? getActiveChain(db)).filter(e => e.enabled);
 
@@ -2219,7 +2262,7 @@ export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, pre
   // entirely: probing unmeasured models during a fleet-wide outage just burns
   // retry budget on the same dead providers, and the scored order of known
   // survivors is the only thing worth trying.
-  if (strategy !== 'priority' && getExploreEnabled() && !isDegraded() && Math.random() < EXPLORE_CHANCE) {
+  if (!strictOrder && getExploreEnabled() && !isDegraded() && Math.random() < EXPLORE_CHANCE) {
     // A model the operator zeroed out via MODEL_ROUTING_OVERRIDES never wins a
     // bandit draw, so it would stay under EXPLORE_MIN_SAMPLES forever and become
     // a perpetual probe target — the explicit ban outranks exploration.
@@ -2412,11 +2455,19 @@ export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, pre
     // can serve right now — in which case we fall through to the next model in
     // the sorted chain for THIS request (no explicit penalty needed).
     const route = selectKeyForModel(entry, estimatedTokens, skipKeys, diag);
-    if (route) return route;
+    if (route) {
+      // In primary-first, the diagnostics collected before this route are
+      // exactly the reasons the primary (and any earlier fallback) was skipped.
+      // Record them for X-Fallback-Trail; every other strategy keeps its
+      // existing trail behaviour.
+      if (strategy === 'primary-first') recordRouteSkips(keylessLine ? [...diag, keylessLine] : diag);
+      return route;
+    }
   }
 
   // The aggregate keyless line rides in diagnostics but NOT in the summary's
   // route count: those models were never candidates for this request.
+  if (strategy === 'primary-first') recordRouteSkips(keylessLine ? [...diag, keylessLine] : diag);
   throw new RouteError(
     summarizeExhaustion(diag, getSoonestCooldownExpiry(), Date.now(), keylessSkipped),
     429,
@@ -2525,6 +2576,60 @@ export function getRoutingScores(): { strategy: RoutingStrategy; keySelectionStr
 }
 
 /**
+ * The chain's own primary: the entry routing would reach first under
+ * primary-first (tier, then manual priority, then insertion order). Used only
+ * to decide whether a sticky pin still points at the primary.
+ */
+function primaryChainEntry(chain: ChainRow[]): ChainRow | undefined {
+  let best: ChainRow | undefined;
+  for (const entry of chain) {
+    if (entry.enabled !== 1) continue;
+    if (!best) { best = entry; continue; }
+    const tier = entry.match_tier ?? 0;
+    const bestTier = best.match_tier ?? 0;
+    if (tier < bestTier || (tier === bestTier && entry.priority < best.priority)) best = entry;
+  }
+  return best;
+}
+
+/**
+ * Apply the sticky-session policy to one pin, over the chain this request will
+ * route. Returns the id to pass to routeRequest (or undefined to drop it).
+ *
+ * - 'off'          → never honor a pin.
+ * - 'on'           → legacy behavior (any enabled chain member).
+ * - 'primary_only' → honor the pin only while it points at the chain's own
+ *                    primary, so a failover can never keep serving a lower
+ *                    model on later turns.
+ *
+ * The 'primary-first' strategy forces the primary-only rule regardless of the
+ * persisted mode, because that mode's whole contract is that every request
+ * starts from the top of the chain.
+ *
+ * `strategyOverride` is the `auto:<axis>` preset for THIS request (if any):
+ * an explicit `auto:smart` still asks for score order, so it keeps the
+ * persisted sticky mode instead of being forced into primary-only.
+ */
+export function stickyPreferenceForChain(
+  stickyModelDbId: number | undefined,
+  chain: ChainRow[],
+  strategyOverride?: PresetStrategy,
+): number | undefined {
+  if (stickyModelDbId == null) return undefined;
+  const mode = getStickySessionsMode();
+  if (mode === 'off') return undefined;
+
+  const strategy = strategyOverride ?? effectiveRoutingStrategy();
+  const primaryOnly = mode === 'primary_only' || strategy === 'primary-first';
+  if (primaryOnly) {
+    return primaryChainEntry(chain)?.model_db_id === stickyModelDbId ? stickyModelDbId : undefined;
+  }
+  return chain.some(entry => entry.model_db_id === stickyModelDbId && entry.enabled)
+    ? stickyModelDbId
+    : undefined;
+}
+
+/**
  * Filter a sticky-session pin down to something still routable (#634).
  *
  * A sticky entry holds a model db id for up to 30 minutes, so it goes stale the
@@ -2534,15 +2639,19 @@ export function getRoutingScores(): { strategy: RoutingStrategy; keySelectionStr
  * right for a client that named the model and wrong for a pin the client never
  * asked for. Dropping it here falls the request through to normal auto routing.
  *
+ * Also applies the sticky_sessions policy (off / on / primary_only), so a
+ * primary-first chain can never pin a session to a fallback model.
+ *
  * Pass the same chain the request will route over (the prefetched auto chain);
  * omit it to check the active chain, which is what routeRequest would use.
  */
-export function resolveStickyPreference(stickyModelDbId: number | undefined, chain?: ChainRow[]): number | undefined {
+export function resolveStickyPreference(
+  stickyModelDbId: number | undefined,
+  chain?: ChainRow[],
+  strategyOverride?: PresetStrategy,
+): number | undefined {
   if (stickyModelDbId == null) return undefined;
-  const rows = chain ?? getActiveChain(getDb());
-  return rows.some(entry => entry.model_db_id === stickyModelDbId && entry.enabled)
-    ? stickyModelDbId
-    : undefined;
+  return stickyPreferenceForChain(stickyModelDbId, chain ?? getActiveChain(getDb()), strategyOverride);
 }
 
 // Whether at least one vision-capable model is enabled in the fallback chain.

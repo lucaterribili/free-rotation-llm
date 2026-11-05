@@ -24,7 +24,7 @@ import {
   getCompressionConfig,
   setCompressionConfig,
 } from '../services/compression/config.js';
-import { getHeadroomThresholds, setHeadroomThresholds, getTaskWeightShare, setTaskWeightShare, getMinReliabilityFloor, setMinReliabilityFloor, isProviderMomentAttributionEnabled, setProviderMomentAttribution } from '../services/router.js';
+import { getHeadroomThresholds, setHeadroomThresholds, getTaskWeightShare, setTaskWeightShare, getMinReliabilityFloor, setMinReliabilityFloor, isProviderMomentAttributionEnabled, setProviderMomentAttribution, getStickySessionsMode, setStickySessionsMode, type StickySessionsMode } from '../services/router.js';
 import { MCP_ENABLED_SETTING, isMcpServerEnabled } from './mcp.js';
 import { z } from 'zod';
 import { getAppVersion } from '../lib/app-version.js';
@@ -410,6 +410,32 @@ settingsRouter.get('/min-reliability-floor', (_req: Request, res: Response) => {
 
 const minReliabilityFloorPutSchema = z.object({
   floor: z.number().min(0).max(1).nullable().optional(),
+});
+
+// ── Sticky sessions ─────────────────────────────────────────────────────────
+// Conversation affinity: whether a chat may pin itself to the model that served
+// its previous turn. 'off' disables reading and writing the pin, 'on' keeps the
+// historical 30-minute affinity, 'primary_only' only honors a pin that still
+// points at the active chain's primary. Under 'primary-first' the effective
+// behavior is always 'off' or 'primary_only' (see router.ts).
+settingsRouter.get('/sticky-sessions', (_req: Request, res: Response) => {
+  res.json({ mode: getStickySessionsMode() });
+});
+
+const stickySessionsPutSchema = z.object({
+  mode: z.enum(['off', 'on', 'primary_only']),
+});
+
+settingsRouter.put('/sticky-sessions', (req: Request, res: Response) => {
+  const parsed = stickySessionsPutSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({
+      error: { message: "Invalid sticky sessions: mode must be 'off', 'on', or 'primary_only'", type: 'invalid_request_error' },
+    });
+    return;
+  }
+  setStickySessionsMode(parsed.data.mode as StickySessionsMode);
+  res.json({ mode: getStickySessionsMode() });
 });
 
 // Update the minimum reliability floor. null clears back to disabled. Takes

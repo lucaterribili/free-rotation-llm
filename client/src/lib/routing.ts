@@ -56,7 +56,12 @@ export interface FallbackEntry {
   groupLabel?: string
 }
 
-export type RoutingStrategy = 'priority' | 'balanced' | 'smartest' | 'fastest' | 'reliable' | 'custom' | 'decision'
+export type RoutingStrategy = 'priority' | 'primary-first' | 'balanced' | 'smartest' | 'fastest' | 'reliable' | 'custom' | 'decision'
+
+/** Conversation-affinity policy. 'primary_only' honors a pin only while it
+ *  still points at the chain's primary; 'primary-first' forces that effective
+ *  behavior regardless of the persisted value. */
+export type StickySessionsMode = 'off' | 'on' | 'primary_only'
 
 /** The 'decision' strategy's settings and since-restart picks (#1354): a
  *  decision model picks one of four presets per request, Balanced when unsure. */
@@ -120,6 +125,8 @@ export interface RoutingData {
   /** Key-selection policy (#919). Required for the same reason as
    *  exploreEnabled: the picker renders straight from GET /routing. */
   keySelectionStrategy: KeySelectionStrategy
+  /** Sticky-session policy. Optional so an older server still renders. */
+  stickySessions?: StickySessionsMode
   /** Ceiling on the router's own cooldown guesses in ms (#952); null = no cap
    *  (ladder tops out at 24h, 402/403 bench a day). */
   cooldownCeilingMs: number | null

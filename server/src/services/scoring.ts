@@ -30,10 +30,12 @@ export interface RoutingWeights {
 
 // Strategy is either the legacy manual chain ('priority'), one of the bandit
 // presets, 'custom' (a user-tuned weight vector persisted in settings — see
-// router.ts) or 'decision' (#1354: a decision model picks one of the four
-// presets per request — see services/routing-decision.ts). Each resolves to a
-// weight vector — the engine is identical.
-export type RoutingStrategy = 'priority' | 'balanced' | 'smartest' | 'fastest' | 'reliable' | 'custom' | 'decision';
+// router.ts), 'decision' (#1354: a decision model picks one of the four
+// presets per request — see services/routing-decision.ts), or 'primary-first'
+// (strict manual order with NO penalty or soft-score demotion: the first entry
+// that clears the hard gates serves, and lower entries are per-request
+// fallbacks only). The first two have no weight vector; the rest do.
+export type RoutingStrategy = 'priority' | 'primary-first' | 'balanced' | 'smartest' | 'fastest' | 'reliable' | 'custom' | 'decision';
 
 /** The presets a decision model may choose between, per request. */
 export type PresetStrategy = 'balanced' | 'smartest' | 'fastest' | 'reliable';

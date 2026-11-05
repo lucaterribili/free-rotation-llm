@@ -32,6 +32,7 @@ import {
   type RoutingStrategy,
   type RoutingWeights,
   type KeySelectionStrategy,
+  type StickySessionsMode,
   type Row,
   type TokenUsageData,
 } from '@/lib/routing'
@@ -57,6 +58,7 @@ import { ChainManager } from '@/components/chain-manager'
 // It differs from the routing `key` for Manual, whose strategy id is 'priority'.
 const STRATEGIES: { key: RoutingStrategy; tKey: string }[] = [
   { key: 'priority', tKey: 'manual' },
+  { key: 'primary-first', tKey: 'primaryFirst' },
   { key: 'balanced', tKey: 'balanced' },
   { key: 'smartest', tKey: 'smartest' },
   { key: 'fastest', tKey: 'fastest' },
@@ -183,6 +185,7 @@ export default function FallbackPage() {
       strategy: RoutingStrategy; weights?: RoutingWeights; exploreEnabled?: boolean
       peakHoursAdjust?: boolean; peakStartHour?: number; peakEndHour?: number; peakTimezone?: string
       keySelectionStrategy?: KeySelectionStrategy; cooldownCeilingMs?: number | null
+      stickySessions?: StickySessionsMode
       decisionModel?: string; decisionMinProbability?: number
     }) =>
       apiFetch('/api/fallback/routing', { method: 'PUT', body: JSON.stringify(payload) }),
@@ -191,7 +194,9 @@ export default function FallbackPage() {
 
   const strategy: RoutingStrategy = routing?.strategy ?? 'balanced'
   const keySelection: KeySelectionStrategy = routing?.keySelectionStrategy ?? 'auto'
-  const isManual = strategy === 'priority'
+  // Both strict strategies walk the chain top-to-bottom, so the table below is
+  // the routing order and dragging reorders what runs first.
+  const isManual = strategy === 'priority' || strategy === 'primary-first'
 
   // Merge fallback metadata with live scores, keyed by model. Memoized (#1047):
   // recomputing these over the whole catalog on every render — and the page
@@ -437,7 +442,9 @@ export default function FallbackPage() {
           </div>
 
           <p className="mt-2 text-xs text-muted-foreground">
-            {isManual ? t('strategies.modeManualHint') : t('strategies.modeScoreHint')}
+            {strategy === 'primary-first'
+              ? t('strategies.modePrimaryFirstHint')
+              : isManual ? t('strategies.modeManualHint') : t('strategies.modeScoreHint')}
           </p>
 
           {!optionsCollapsed && (
@@ -458,6 +465,27 @@ export default function FallbackPage() {
                   <option value="least-remaining">{t('strategies.keySelectionLeastRemaining')}</option>
                 </select>
                 <Tooltip text={t('strategies.keySelectionHint')}>
+                  <span className="cursor-help underline decoration-dotted underline-offset-2">?</span>
+                </Tooltip>
+              </label>
+
+              {/* Sticky sessions: whether a conversation may pin itself to the
+                  model that served its previous turn. Under primary-first the
+                  effective policy is always primary-only (or off), so a
+                  failover can never make a lower model sticky. */}
+              <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{t('strategies.stickySessions')}</span>
+                <select
+                  value={routing?.stickySessions ?? 'on'}
+                  disabled={strategyMutation.isPending}
+                  onChange={e => strategyMutation.mutate({ strategy, stickySessions: e.target.value as StickySessionsMode })}
+                  className="rounded-lg border bg-background px-2 py-1.5 text-xs text-foreground"
+                >
+                  <option value="on">{t('strategies.stickySessionsOn')}</option>
+                  <option value="primary_only">{t('strategies.stickySessionsPrimaryOnly')}</option>
+                  <option value="off">{t('strategies.stickySessionsOff')}</option>
+                </select>
+                <Tooltip text={strategy === 'primary-first' ? t('strategies.stickySessionsPrimaryFirstHint') : t('strategies.stickySessionsHint')}>
                   <span className="cursor-help underline decoration-dotted underline-offset-2">?</span>
                 </Tooltip>
               </label>

@@ -862,11 +862,23 @@ export function setFallbackHeaders(
   trail: AttemptRecord[] | undefined,
 ): void {
   if (failedAttempts > 0) res.setHeader('X-Fallback-Attempts', String(failedAttempts));
-  if (trail && trail.length > 0) {
-    const value = trail
-      .slice(0, TRAIL_MAX_SHOWN)
+
+  // Why the primary (or an earlier candidate) was skipped BEFORE dispatch,
+  // recorded by the router under 'primary-first'. Only that strategy populates
+  // routeSkips, so every other mode keeps its historical trail byte-for-byte.
+  const skips = getRequestTrace()?.routeSkips ?? [];
+  const trailValue = trail && trail.length > 0
+    ? trail.slice(0, TRAIL_MAX_SHOWN)
       .map(a => `${a.platform}/${a.modelId} key${a.keyOrdinal}=${a.errorClass}`)
-      .join('; ') + (trail.length > TRAIL_MAX_SHOWN ? `; +${trail.length - TRAIL_MAX_SHOWN} more` : '');
+      .join('; ') + (trail.length > TRAIL_MAX_SHOWN ? `; +${trail.length - TRAIL_MAX_SHOWN} more` : '')
+    : '';
+  const skipValue = skips.length > 0
+    ? skips.slice(0, TRAIL_MAX_SHOWN)
+      .map(s => `skipped ${s.replace(/;/g, ',')}`)
+      .join('; ') + (skips.length > TRAIL_MAX_SHOWN ? `; +${skips.length - TRAIL_MAX_SHOWN} more` : '')
+    : '';
+  const value = [trailValue, skipValue].filter(Boolean).join('; ');
+  if (value) {
     // Ten hops of "platform/model keyN=class" outgrow the default cap, so the
     // trail gets its own budget.
     res.setHeader('X-Fallback-Trail', safeHeaderValue(value, TRAIL_HEADER_MAX_LENGTH));

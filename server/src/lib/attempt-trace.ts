@@ -53,6 +53,12 @@ export interface AttemptTraceRecord {
 
 export interface RequestTrace {
   records: AttemptTraceRecord[];
+  // Reasons chain entries were skipped BEFORE dispatch under the
+  // 'primary-first' strategy (one diagnostic line per skipped model: cooldown,
+  // rpm/rpd, no healthy key, capability gate, …). The fallback trail merges
+  // these so a caller can see why the primary was not tried. Empty for every
+  // other strategy, where the existing trail behaviour is unchanged.
+  routeSkips: string[];
   // Rowid of the most recent `requests` row logged during this trace's run;
   // null until the first logRequest lands (e.g. a client abort on attempt 1).
   lastRequestRowId: number | null;
@@ -61,7 +67,7 @@ export interface RequestTrace {
 const storage = new AsyncLocalStorage<RequestTrace>();
 
 export function newRequestTrace(): RequestTrace {
-  return { records: [], lastRequestRowId: null };
+  return { records: [], routeSkips: [], lastRequestRowId: null };
 }
 
 export function runWithRequestTrace<T>(trace: RequestTrace, fn: () => T): T {
@@ -76,4 +82,20 @@ export function getRequestTrace(): RequestTrace | undefined {
 export function noteRequestRowId(id: number | bigint): void {
   const trace = storage.getStore();
   if (trace) trace.lastRequestRowId = Number(id);
+}
+
+/**
+ * Record the router's "skipped because" lines for this request. Deduplicated
+ * because routeRequest runs once per fallback attempt and the same primary
+ * reason (e.g. still on cooldown) is re-derived on each pass. No-op outside a
+ * fallback-loop trace, so direct router callers and fusion sub-calls are
+ * unaffected.
+ */
+export function recordRouteSkips(lines: string[]): void {
+  if (lines.length === 0) return;
+  const trace = storage.getStore();
+  if (!trace) return;
+  for (const line of lines) {
+    if (!trace.routeSkips.includes(line)) trace.routeSkips.push(line);
+  }
 }

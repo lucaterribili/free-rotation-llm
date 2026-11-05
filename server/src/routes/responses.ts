@@ -9,7 +9,7 @@ import type {
   ChatToolChoice,
   Platform,
 } from '@freellmapi/shared/types.js';
-import { routeRequest, hasEnabledVisionModel, hasEnabledToolsModel, resolveStickyPreference, routingReserveTokens, resolveModelGroupCandidates, resolveRoutingChain, failureAttributionFor, type RouteResult, type ResolvedChain, type ChainRow } from '../services/router.js';
+import { routeRequest, hasEnabledVisionModel, hasEnabledToolsModel, resolveStickyPreference, stickyPreferenceForChain, routingReserveTokens, resolveModelGroupCandidates, resolveRoutingChain, failureAttributionFor, type RouteResult, type ResolvedChain, type ChainRow } from '../services/router.js';
 import { getDb } from '../db/index.js';
 import { resolveAuth, prependSystemPrompt } from '../lib/system-prompt.js';
 import { isUnifyEnabled, getModelGroups, resolveRequestedIdForDispatch } from '../services/model-groups.js';
@@ -856,8 +856,10 @@ export async function handleResponses(req: Request, res: Response): Promise<void
     // Strict over the tier's pool; an empty tier falls through to plain auto.
     groupChain = aliasTierChain;
     stickyStrategyKey = `tier:${aliasTierChain[0]!.model_db_id}`;
-    const sticky = getStickyModel(messages, sessionIdHeader, stickyStrategyKey);
-    preferredModel = (sticky != null && groupChain.some(r => r.model_db_id === sticky)) ? sticky : undefined;
+    preferredModel = stickyPreferenceForChain(
+      getStickyModel(messages, sessionIdHeader, stickyStrategyKey),
+      groupChain,
+    );
   } else if (isAutoModel(routedModel)) {
     try {
       resolvedChain = resolveRoutingChain(routedModel);
@@ -874,6 +876,7 @@ export async function handleResponses(req: Request, res: Response): Promise<void
     preferredModel = resolveStickyPreference(
       getStickyModel(messages, sessionIdHeader, stickyStrategyKey),
       resolvedChain.chain,
+      resolvedChain.strategyOverride,
     );
   } else if (isFusionModel(routedModel)) {
     // Fusion is a virtual model, not a row in the catalog. Its panel and
@@ -898,7 +901,7 @@ export async function handleResponses(req: Request, res: Response): Promise<void
         return;
       }
       const sticky = getStickyModel(messages, sessionIdHeader, routedModel);
-      preferredModel = (sticky != null && groupChain.some(r => r.model_db_id === sticky)) ? sticky : undefined;
+      preferredModel = stickyPreferenceForChain(sticky, groupChain);
     } else {
       const enabled = db.prepare('SELECT id FROM models WHERE model_id = ? AND enabled = 1').get(routedModel) as { id: number } | undefined;
       if (enabled) {

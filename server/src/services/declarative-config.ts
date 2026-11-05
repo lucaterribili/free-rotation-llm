@@ -4,7 +4,7 @@ import type { Db } from '../db/types.js';
 import { getDb, getSetting, setSetting } from '../db/index.js';
 import { encrypt } from '../lib/crypto.js';
 import { resolveProvider } from '../providers/index.js';
-import { setCustomWeights, setRoutingStrategy, setKeySelectionStrategy } from './router.js';
+import { setCustomWeights, setRoutingStrategy, setKeySelectionStrategy, setStickySessionsMode } from './router.js';
 import { ensureModelInProfiles } from './profile-models.js';
 import { customModelSeed } from './custom-model-seed.js';
 import { createUser, userCount } from './auth.js';
@@ -105,7 +105,9 @@ const declarativeConfigSchema = z.object({
   models: z.array(modelSchema).optional(),
   fallback: z.array(fallbackEntrySchema).optional(),
   routing: z.object({
-    strategy: z.enum(['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision']),
+    strategy: z.enum(['priority', 'primary-first', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision']),
+    // Conversation-affinity policy; omitted leaves the persisted value alone.
+    stickySessions: z.enum(['off', 'on', 'primary_only']).optional(),
     weights: z.object({
       reliability: z.number().nonnegative(),
       speed: z.number().nonnegative(),
@@ -517,6 +519,9 @@ export function applyDeclarativeConfig(input: unknown, source = 'inline'): Decla
     if (parsed.data.routing) {
       if (parsed.data.routing.weights) setCustomWeights(parsed.data.routing.weights);
       setRoutingStrategy(parsed.data.routing.strategy);
+      if (parsed.data.routing.stickySessions) {
+        setStickySessionsMode(parsed.data.routing.stickySessions);
+      }
       if (parsed.data.routing.keySelectionStrategy) {
         setKeySelectionStrategy(parsed.data.routing.keySelectionStrategy);
       }

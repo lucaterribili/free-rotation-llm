@@ -9,6 +9,7 @@ import { getDb } from '../db/index.js';
 import {
   routeRequest,
   resolveStickyPreference,
+  stickyPreferenceForChain,
   routingReserveTokens,
   resolveModelGroupCandidates,
   type ChainRow,
@@ -126,9 +127,7 @@ function resolvePin(model: string | undefined, messages: ChatMessage[], sessionI
     }
     const sticky = getStickyModel(messages, sessionId, requested);
     return {
-      preferredModel: sticky != null && strictChain.some(row => row.model_db_id === sticky)
-        ? sticky
-        : undefined,
+      preferredModel: stickyPreferenceForChain(sticky, strictChain),
       strictChain,
       pinnedLabel: requested,
     };

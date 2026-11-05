@@ -7,7 +7,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { getDb } from '../db/index.js';
-import { getAllPenalties, getRoutingScores, getRoutingStrategy, setRoutingStrategy, setCustomWeights, getExploreEnabled, setExploreEnabled, getPeakHoursConfig, setPeakHoursConfig, getActiveRoutingWeights, getKeySelectionStrategy, setKeySelectionStrategy } from '../services/router.js';
+import { getAllPenalties, getRoutingScores, getRoutingStrategy, setRoutingStrategy, setCustomWeights, getExploreEnabled, setExploreEnabled, getPeakHoursConfig, setPeakHoursConfig, getActiveRoutingWeights, getKeySelectionStrategy, setKeySelectionStrategy, getStickySessionsMode, setStickySessionsMode } from '../services/router.js';
 import { BANDIT_PRESETS, isValidTimezone, type RoutingStrategy } from '../services/scoring.js';
 import { parseBudget, monthlyBudgetScore } from '../lib/budget.js';
 import { getModelGroups } from '../services/model-groups.js';
@@ -35,6 +35,7 @@ fallbackRouter.get('/routing', (_req: Request, res: Response) => {
   const { peakHours, ...rest } = getRoutingScores();
   res.json({
     ...rest,
+    stickySessions: getStickySessionsMode(),
     peakHoursAdjust: peakHours.enabled,
     peakStartHour: peakHours.startHour,
     peakEndHour: peakHours.endHour,
@@ -58,7 +59,11 @@ fallbackRouter.delete('/penalty-inspector', (_req: Request, res: Response) => {
 });
 
 const routingSchema = z.object({
-  strategy: z.enum(['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision']),
+  strategy: z.enum(['priority', 'primary-first', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision']),
+  // Sticky-session policy: 'off' disables conversation affinity, 'on' keeps
+  // the historical 30-minute pin, 'primary_only' only honors a pin that still
+  // points at the chain's primary (forced under 'primary-first').
+  stickySessions: z.enum(['off', 'on', 'primary_only']).optional(),
   // Only meaningful with strategy 'custom': the user's weight vector. Any
   // non-negative vector is accepted; setCustomWeights renormalizes to sum 1.
   weights: z.object({
@@ -112,6 +117,9 @@ fallbackRouter.put('/routing', (req: Request, res: Response) => {
     }
   }
   setRoutingStrategy(parsed.data.strategy as RoutingStrategy);
+  if (parsed.data.stickySessions !== undefined) {
+    setStickySessionsMode(parsed.data.stickySessions);
+  }
   if (parsed.data.exploreEnabled !== undefined) {
     setExploreEnabled(parsed.data.exploreEnabled);
   }
@@ -141,6 +149,7 @@ fallbackRouter.put('/routing', (req: Request, res: Response) => {
   const peak = getPeakHoursConfig();
   res.json({
     strategy: getRoutingStrategy(),
+    stickySessions: getStickySessionsMode(),
     exploreEnabled: getExploreEnabled(),
     keySelectionStrategy: getKeySelectionStrategy(),
     decision: getDecisionRoutingStatus(),

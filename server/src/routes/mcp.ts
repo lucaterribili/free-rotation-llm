@@ -217,7 +217,7 @@ function routingInfo(): unknown {
   };
 }
 
-const ROUTING_STRATEGIES = ['priority', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision'] as const;
+const ROUTING_STRATEGIES = ['priority', 'primary-first', 'balanced', 'smartest', 'fastest', 'reliable', 'custom', 'decision'] as const;
 
 function setStrategy(args: Record<string, unknown>): unknown {
   const strategy = args.strategy;
@@ -511,7 +511,7 @@ const TOOLS: Record<string, McpTool> = {
   },
   set_routing_strategy: {
     title: 'Set model routing strategy',
-    description: 'Switch the routing strategy (priority = manual chain order; balanced / smartest / fastest / reliable are scored presets; custom uses the saved weight vector).',
+    description: 'Switch the routing strategy (priority = manual chain order; primary-first = strict manual chain order with every request restarting at the primary; balanced / smartest / fastest / reliable are scored presets; custom uses the saved weight vector).',
     inputSchema: {
       type: 'object',
       properties: {

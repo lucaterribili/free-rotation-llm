@@ -3,7 +3,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { ChatMessage, ChatToolCall, TokenUsage } from '@freellmapi/shared/types.js';
-import { type RouteResult, type ResolvedChain, type ChainRow, routeRequest, resolveRoutingChain, resolveModelGroupCandidates, resolveStickyPreference, hasEnabledVisionModel, hasEnabledToolsModel, routingReserveTokens, failureAttributionFor } from '../services/router.js';
+import { type RouteResult, type ResolvedChain, type ChainRow, routeRequest, resolveRoutingChain, resolveModelGroupCandidates, resolveStickyPreference, stickyPreferenceForChain, getStickySessionsMode, hasEnabledVisionModel, hasEnabledToolsModel, routingReserveTokens, failureAttributionFor } from '../services/router.js';
 import { secondsUntilNextMonth, nextMonthResetAt } from '../services/key-budget.js';
 import { runEmbeddings, EmbeddingsError } from '../services/embeddings.js';
 import { runRerank, RerankError, rerankRetryAfterSec } from '../services/rerank.js';
@@ -289,6 +289,9 @@ export function getStickyModel(messages: ChatMessage[], sessionIdHeader?: string
 }
 
 export function setStickyModel(messages: ChatMessage[], modelDbId: number, sessionIdHeader?: string, strategyKey?: string) {
+  // 'off' means no affinity at all: don't even write an entry the next turn
+  // would have to ignore.
+  if (getStickySessionsMode() === 'off') return;
   const key = getSessionKey(messages, sessionIdHeader, strategyKey);
   if (!key) return;
   stickySessionMap.set(key, { modelDbId, lastUsed: Date.now() });
@@ -2417,10 +2420,16 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
     // empty tier falls through to plain auto, as on /v1/messages.
     groupChain = aliasTierChain;
     stickyStrategyKey = `tier:${aliasTierChain[0]!.model_db_id}`;
-    const sticky = getStickyModel(messages, sessionIdHeader, stickyStrategyKey);
-    preferredModel = (sticky != null && groupChain.some(r => r.model_db_id === sticky)) ? sticky : undefined;
+    preferredModel = stickyPreferenceForChain(
+      getStickyModel(messages, sessionIdHeader, stickyStrategyKey),
+      groupChain,
+    );
   } else if (isAutoModel(requestedModel)) {
-    preferredModel = resolveStickyPreference(getStickyModel(messages, sessionIdHeader, strategyKey), resolvedChain?.chain);
+    preferredModel = resolveStickyPreference(
+      getStickyModel(messages, sessionIdHeader, strategyKey),
+      resolvedChain?.chain,
+      resolvedChain?.strategyOverride,
+    );
   } else if (requestedModel) {
     const db = getDb();
     // Unify ON: a requested id (canonical slug OR any provider's model_id) maps
@@ -2459,11 +2468,14 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
         return;
       }
       stickyStrategyKey = requestedModel;
-      const sticky = getStickyModel(messages, sessionIdHeader, stickyStrategyKey);
-      // Only prefer the sticky member if it's actually IN this group — passing a
-      // non-member as preferredModelDbId would make routeRequest inject an
-      // off-group model and break strict pinning.
-      preferredModel = (sticky != null && groupChain.some(r => r.model_db_id === sticky)) ? sticky : undefined;
+      // Only prefer the sticky member if it is still the group's primary (and
+      // the sticky policy allows it). Passing a non-member as
+      // preferredModelDbId would make routeRequest inject an off-group model
+      // and break strict pinning.
+      preferredModel = stickyPreferenceForChain(
+        getStickyModel(messages, sessionIdHeader, stickyStrategyKey),
+        groupChain,
+      );
     } else {
       // Unify OFF, or an id that isn't in the catalog: legacy single-row pin.
       const enabled = db.prepare('SELECT id FROM models WHERE model_id = ? AND enabled = 1').get(requestedModel) as { id: number } | undefined;
@@ -2484,7 +2496,11 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
       }
     }
   } else {
-    preferredModel = resolveStickyPreference(getStickyModel(messages, sessionIdHeader, strategyKey), resolvedChain?.chain);
+    preferredModel = resolveStickyPreference(
+      getStickyModel(messages, sessionIdHeader, strategyKey),
+      resolvedChain?.chain,
+      resolvedChain?.strategyOverride,
+    );
   }
 
   // For analytics: the model id the client pinned, null when auto-routed
