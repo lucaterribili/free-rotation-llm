@@ -10,10 +10,10 @@
 #
 # Secrets live OUTSIDE git: .env.container (ENCRYPTION_KEY) and docker-data/
 # (the SQLite DB). Both are in .gitignore.
-name: freellmapi-dev
+name: free-rotation-llm-dev
 
 services:
-  freellmapi:
+  app:
     build:
       context: .
       dockerfile: docker/Dockerfile.dev
