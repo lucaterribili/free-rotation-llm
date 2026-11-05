@@ -8,7 +8,7 @@ import type {
   ChatToolDefinition,
   ChatToolChoice,
   ChatContentBlock,
-} from '@freellmapi/shared/types.js';
+} from '@free-rotation-llm/shared/types.js';
 import { routeRequest, resolveModelGroupCandidates, resolveRoutingChain, resolveStickyPreference, stickyPreferenceForChain, routingReserveTokens, failureAttributionFor, type RouteResult, type ResolvedChain, type ChainRow } from '../services/router.js';
 import { getSetting } from '../db/index.js';
 import { resolveAuth, prependSystemPrompt, type ResolvedAuth } from '../lib/system-prompt.js';

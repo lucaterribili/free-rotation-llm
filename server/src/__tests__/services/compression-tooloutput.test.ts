@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ChatMessage } from '@freellmapi/shared/types.js';
+import type { ChatMessage } from '@free-rotation-llm/shared/types.js';
 import { DEFAULT_COMPRESSION_CONFIG } from '../../services/compression/config.js';
 import { compressRequest } from '../../services/compression/pipeline.js';
 import { minifyJsonText, stripTerminalNoise } from '../../services/compression/engines/tooloutput.js';

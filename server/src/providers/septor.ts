@@ -1,4 +1,4 @@
-import type { ChatCompletionChunk, ChatCompletionResponse, ChatMessage } from '@freellmapi/shared/types.js';
+import type { ChatCompletionChunk, ChatCompletionResponse, ChatMessage } from '@free-rotation-llm/shared/types.js';
 import type { CompletionOptions } from './base.js';
 import type { QuotaObservationContext } from '../services/provider-quota.js';
 import { OpenAICompatProvider } from './openai-compat.js';

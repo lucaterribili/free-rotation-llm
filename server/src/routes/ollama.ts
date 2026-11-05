@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type {
   ChatMessage,
   ChatToolDefinition,
-} from '@freellmapi/shared/types.js';
+} from '@free-rotation-llm/shared/types.js';
 import { getSetting, getUnifiedApiKey } from '../db/index.js';
 import { buildModelListing } from '../services/model-listing.js';
 import { extractApiToken, timingSafeStringEqual } from './proxy.js';

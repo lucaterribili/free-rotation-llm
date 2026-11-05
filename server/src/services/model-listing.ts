@@ -1,4 +1,4 @@
-import type { ModelListRow } from '@freellmapi/shared/types.js';
+import type { ModelListRow } from '@free-rotation-llm/shared/types.js';
 import { getDb } from '../db/index.js';
 import { isUnifyEnabled, getModelGroups } from './model-groups.js';
 import { hasUsableKeyForModel } from './router.js';

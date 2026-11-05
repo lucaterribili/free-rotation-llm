@@ -1,5 +1,5 @@
 {
-  "name": "freellmapi",
+  "name": "free-rotation-llm",
   "version": "0.8.2",
   "description": "Set up coding agents to use a Free Rotation LLM Provider gateway",
   "license": "MIT",
@@ -25,6 +25,7 @@
   ],
   "type": "module",
   "bin": {
+    "free-rotation-llm": "dist/index.js",
     "freellmapi": "dist/index.js"
   },
   "exports": {

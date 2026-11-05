@@ -1,4 +1,4 @@
-import type { Platform } from '@freellmapi/shared/types.js';
+import type { Platform } from '@free-rotation-llm/shared/types.js';
 import type { BaseProvider } from './base.js';
 import { GoogleProvider } from './google.js';
 import { OpenAICompatProvider } from './openai-compat.js';

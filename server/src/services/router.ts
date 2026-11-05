@@ -45,7 +45,7 @@ import { recordRouteSkips, getRequestTrace } from '../lib/attempt-trace.js';
 import { parseModelScope, scopeAllows } from '../lib/model-scope.js';
 import { getKeyQuotaHeadroom, inferQuotaPoolKey } from './provider-quota.js';
 import type { BaseProvider } from '../providers/base.js';
-import type { Platform } from '@freellmapi/shared/types.js';
+import type { Platform } from '@free-rotation-llm/shared/types.js';
 import type { Db } from '../db/types.js';
 
 class RouteError extends Error {

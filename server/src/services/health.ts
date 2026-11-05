@@ -4,7 +4,7 @@ import { BaseProvider } from '../providers/base.js';
 import { decrypt } from '../lib/crypto.js';
 import { decryptProxyUrl } from '../lib/key-proxy.js';
 import { withKeyProxy } from '../lib/proxy.js';
-import type { Platform, KeyStatus } from '@freellmapi/shared/types.js';
+import type { Platform, KeyStatus } from '@free-rotation-llm/shared/types.js';
 import { inferQuotaPoolKey } from './provider-quota.js';
 import { updateDegradationState } from './degradation.js';
 import type { Scheduler } from '../lib/scheduler.js';

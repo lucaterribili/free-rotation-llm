@@ -32,7 +32,7 @@ import {
   triggerBuiltinModelDiscovery,
 } from '../services/builtin-model-discovery.js';
 import type { Db } from '../db/types.js';
-import type { Platform } from '@freellmapi/shared/types.js';
+import type { Platform } from '@free-rotation-llm/shared/types.js';
 import { parseModelScope } from '../lib/model-scope.js';
 import { KEY_PROXY_URL_ERROR, KEY_PROXY_URL_MAX, decryptProxyUrl, encryptProxyUrl, isValidKeyProxyUrl, maskProxyUrl } from '../lib/key-proxy.js';
 

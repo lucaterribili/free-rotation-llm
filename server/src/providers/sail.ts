@@ -6,7 +6,7 @@ import type {
   ChatToolChoice,
   Platform,
   TokenUsage,
-} from '@freellmapi/shared/types.js';
+} from '@free-rotation-llm/shared/types.js';
 import {
   BaseProvider,
   providerHttpError,

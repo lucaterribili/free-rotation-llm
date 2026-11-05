@@ -6,7 +6,7 @@ import { MEDIA_PLATFORMS, TRANSCRIPTION_PLATFORMS, VIDEO_PLATFORMS } from './med
 import { SEARCH_ENGINE_PLATFORMS, SEARCH_MODALITY } from './search.js';
 import { DECISION_MODALITY, DECISION_PLATFORMS } from './decision.js';
 import { EMBEDDING_PLATFORMS } from './embeddings.js';
-import type { Platform } from '@freellmapi/shared/types.js';
+import type { Platform } from '@free-rotation-llm/shared/types.js';
 import type { Scheduler } from '../lib/scheduler.js';
 import {
   applyAllModelOverrides,

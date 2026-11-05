@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { ChatMessage } from '@freellmapi/shared/types.js';
+import type { ChatMessage } from '@free-rotation-llm/shared/types.js';
 import { initDb } from '../../db/index.js';
 import {
   DEFAULT_COMPRESSION_CONFIG,

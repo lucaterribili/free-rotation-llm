@@ -10,7 +10,7 @@ import type {
   QuotaResetStrategy,
   ProviderQuotaObservation,
   ProviderQuotaState,
-} from '@freellmapi/shared/types.js';
+} from '@free-rotation-llm/shared/types.js';
 
 export interface QuotaObservationContext {
   platform: Platform;

@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import type { ChatMessage, ChatContent } from '@freellmapi/shared/types.js';
+import type { ChatMessage, ChatContent } from '@free-rotation-llm/shared/types.js';
 import { getSetting, setSetting } from '../db/index.js';
 import { setRequestRoutingStrategy } from '../lib/client-context.js';
 import { CLAIRIC_MODEL, DecisionError, listDecisionModels, runDecision } from './decision.js';

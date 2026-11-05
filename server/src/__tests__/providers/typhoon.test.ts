@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { ChatCompletionChunk } from '@freellmapi/shared/types.js';
+import type { ChatCompletionChunk } from '@free-rotation-llm/shared/types.js';
 import { TyphoonProvider, TYPHOON_BASE_URL } from '../../providers/typhoon.js';
 import { getProvider } from '../../providers/index.js';
 import { AUTH_JSON_PROVIDER_MAP, parseKeysFromFile } from '../../lib/key-parser.js';
