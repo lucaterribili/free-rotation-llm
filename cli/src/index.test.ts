@@ -161,7 +161,7 @@ describe('CLI arguments and launchers', () => {
       models,
       {},
       home,
-    )).toThrow("freellmapi setup-claude --profile missing");
+    )).toThrow("free-rotation-llm setup-claude --profile missing");
   });
 
   it('strips the user\'s real Anthropic credentials from the child environment', () => {

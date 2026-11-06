@@ -128,7 +128,7 @@
 Большинство агентов можно настроить одной командой. Она читает актуальный каталог, сохраняет резервную копию текущих настроек и объединяет их с новыми:
 
 ```bash
-npx freellmapi setup-claude --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-claude --url http://localhost:3001 --api-key <unified-key>
 ```
 
 **[Все поддерживаемые агенты и команды настройки →](docs/en/clients/02-supported-agents.md)** · [Инструкции для инструментов, MCP-сервер и URL-токены →](docs/en/clients/01-agent-clients.md)
@@ -191,11 +191,11 @@ curl -fsSL https://freellmapi.co/install.sh | bash
 
 ## OpenAI-совместимые клиенты
 
-Поддерживается любой клиент, которому можно задать OpenAI-совместимый базовый URL: укажите `http://localhost:3001/v1` и единый ключ с панели управления. Все генераторы конфигураций поддерживают `--dry-run`. Команды `npx freellmapi launch` (Claude Code) и `launch-codex` (Codex) позволяют не сохранять учётные данные в конфигурационных файлах. Маршрутизатор также работает как MCP-сервер, который агенты могут опрашивать во время сессии.
+Поддерживается любой клиент, которому можно задать OpenAI-совместимый базовый URL: укажите `http://localhost:3001/v1` и единый ключ с панели управления. Все генераторы конфигураций поддерживают `--dry-run`. Команды `npx free-rotation-llm launch` (Claude Code) и `launch-codex` (Codex) позволяют не сохранять учётные данные в конфигурационных файлах. Маршрутизатор также работает как MCP-сервер, который агенты могут опрашивать во время сессии.
 
 **ChatGPT** подключается к тому же локальному маршрутизатору через приватный Secure MCP Tunnel. MCP-инструмент `ask_freellmapi` отправляет задачу ChatGPT через `/v1/chat/completions` и возвращает ответ с метаданными обслужившей модели, резервной маршрутизации, кеша, выполнения и токенов. Базовый URL и Bearer-аутентификация задаются в настройках клиента туннеля. Модель по умолчанию настраивается через `MCP_INFERENCE_DEFAULT_MODEL` (при отсутствии значения используется `auto`). Нельзя размещать ключ в Git или URL MCP. **[Настройка ChatGPT →](docs/en/clients/01-agent-clients.md#chatgpt-private-secure-mcp-tunnel)**
 
-Ключами провайдеров можно управлять и из терминала с токеном сессии панели (`FREELLMAPI_DASHBOARD_TOKEN` или `--token`): `npx freellmapi keys add|list|remove|test <platform>`. Команда `keys test` повторно проверяет сохранённые ключи. См. [cli/README.md](cli/README.md#provider-keys).
+Ключами провайдеров можно управлять и из терминала с токеном сессии панели (`FREELLMAPI_DASHBOARD_TOKEN` или `--token`): `npx free-rotation-llm keys add|list|remove|test <platform>`. Команда `keys test` повторно проверяет сохранённые ключи. См. [cli/README.md](cli/README.md#provider-keys).
 
 Free Rotation LLM Provider рассчитан прежде всего на локальное использование одним пользователем. Ключи провайдеров остаются в вашей SQLite-базе, зашифрованы на диске, а запросы отправляются с вашего компьютера непосредственно выбранным внешним сервисам.
 

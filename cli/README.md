@@ -5,7 +5,7 @@ gateway in one command. The generators read the models your server is actually
 serving and write the config file each tool expects.
 
 ```bash
-npx freellmapi setup-claude --url http://localhost:3001 --api-key <your-key>
+npx free-rotation-llm setup-claude --url http://localhost:3001 --api-key <your-key>
 ```
 
 No install step, no account. The unified API key comes from your Free Rotation LLM Provider
@@ -66,12 +66,12 @@ The CLI does not log in or persist the dashboard token.
 export FREELLMAPI_URL=http://localhost:3001
 export FREELLMAPI_DASHBOARD_TOKEN='<dashboard-session-token>'
 
-npx freellmapi keys add groq                 # hidden provider-key prompt
-npx freellmapi keys add groq --key '<key>'   # non-interactive alternative
-npx freellmapi keys list
-npx freellmapi keys test groq                # check every stored Groq key
-npx freellmapi keys test groq --id 7         # check one key
-npx freellmapi keys remove groq --id 7
+npx free-rotation-llm keys add groq                 # hidden provider-key prompt
+npx free-rotation-llm keys add groq --key '<key>'   # non-interactive alternative
+npx free-rotation-llm keys list
+npx free-rotation-llm keys test groq                # check every stored Groq key
+npx free-rotation-llm keys test groq --id 7         # check one key
+npx free-rotation-llm keys remove groq --id 7
 ```
 
 `keys list` prints each key's ID, platform, enabled chat model count,

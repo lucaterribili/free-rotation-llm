@@ -123,7 +123,7 @@ async function promptForKey(provider = false): Promise<string> {
   }
   // Imported lazily, not statically: `node:readline/promises` only exists on
   // Node >=17.4, and a static import of it crashes the whole CLI at load time
-  // on older runtimes (#1283) — `npx freellmapi --help` died with
+  // on older runtimes (#1283) — `npx free-rotation-llm --help` died with
   // ERR_UNKNOWN_BUILTIN_MODULE before main() or the engines check could say
   // anything useful. Deferring it means only the interactive key prompt needs
   // a modern Node; every other command degrades to the readable error below.
@@ -246,7 +246,7 @@ export function resolvePinnedModel(
   // to be told which roster the verdict below came from.
   if (rosters.degradedReason) {
     warn(
-      `freellmapi: could not fetch the unfiltered model catalog (${rosters.degradedReason}). `
+      `free-rotation-llm: could not fetch the unfiltered model catalog (${rosters.degradedReason}). `
       + `Checking '${requested}' against the available-only roster instead — a model that `
       + 'exists but is out of quota may be reported as unknown.\n',
     );
@@ -258,7 +258,7 @@ export function resolvePinnedModel(
   // we should make silently.
   if (resolved.unavailable) {
     warn(
-      `freellmapi: '${resolved.id}' is registered but not currently available `
+      `free-rotation-llm: '${resolved.id}' is registered but not currently available `
       + '(out of quota, cooling down, or its key is disabled). Launching anyway.\n',
     );
   }
@@ -270,7 +270,7 @@ function help(): string {
     'Free Rotation LLM Provider coding-agent setup and provider key management',
     '',
     'Usage:',
-    '  freellmapi <command> [--url URL] [--api-key KEY] [--profile NAME] [--model ID] [--dry-run]',
+    '  free-rotation-llm <command> [--url URL] [--api-key KEY] [--profile NAME] [--model ID] [--dry-run]',
     '',
     'Commands:',
     ...tools.map(tool => `  ${tool.command.padEnd(17)} ${tool.name}`),
@@ -378,7 +378,7 @@ export function claudeLaunchEnv(
     if (!fs.existsSync(directory)) {
       throw new Error(
         `Claude profile '${options.profile}' has no configuration directory at ${directory}. `
-        + `Create it with: freellmapi setup-claude --profile ${options.profile}`,
+        + `Create it with: free-rotation-llm setup-claude --profile ${options.profile}`,
       );
     }
     env.CLAUDE_CONFIG_DIR = directory;
@@ -519,19 +519,19 @@ export function unsupportedNodeVersion(
 ): string | null {
   if (!version || !Number.isFinite(major)) return null; // Non-Node runtimes: don't guess.
   if (major >= 20) return null;
-  return `freellmapi requires Node.js 20 or newer (found ${version}). Install one from https://nodejs.org and re-run.`;
+  return `free-rotation-llm requires Node.js 20 or newer (found ${version}). Install one from https://nodejs.org and re-run.`;
 }
 
 if (isDirectExecution()) {
   const unsupported = unsupportedNodeVersion();
   if (unsupported) {
-    process.stderr.write(`freellmapi: ${unsupported}\n`);
+    process.stderr.write(`free-rotation-llm: ${unsupported}\n`);
     process.exitCode = 1;
   } else {
     main().then(
       code => { process.exitCode = code; },
       error => {
-        process.stderr.write(`freellmapi: ${error instanceof Error ? error.message : String(error)}\n`);
+        process.stderr.write(`free-rotation-llm: ${error instanceof Error ? error.message : String(error)}\n`);
         process.exitCode = 1;
       },
     );

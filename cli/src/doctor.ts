@@ -1,4 +1,4 @@
-// `freellmapi doctor` — does this tool's traffic actually reach this gateway?
+// `free-rotation-llm doctor` — does this tool's traffic actually reach this gateway?
 //
 // The load-bearing constraint: the verdict must be computed in a process that
 // INHERITS THE USER'S SESSION ENVIRONMENT. The server cannot answer this

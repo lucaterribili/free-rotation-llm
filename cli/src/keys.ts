@@ -29,10 +29,10 @@ interface ModelRow {
 export function keysHelp(): string {
   return [
     'Provider key management (dashboard authentication):',
-    '  freellmapi keys add <platform> [--key KEY]',
-    '  freellmapi keys list',
-    '  freellmapi keys remove <platform> [--id ID]',
-    '  freellmapi keys test <platform> [--id ID]',
+    '  free-rotation-llm keys add <platform> [--key KEY]',
+    '  free-rotation-llm keys list',
+    '  free-rotation-llm keys remove <platform> [--id ID]',
+    '  free-rotation-llm keys test <platform> [--id ID]',
     '',
     'Options: --url URL, --token TOKEN, --timeout MS (default 30000)',
     'Use FREELLMAPI_DASHBOARD_TOKEN or --token for the dashboard session token.',

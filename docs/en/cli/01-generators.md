@@ -5,13 +5,13 @@
 ## Usage
 
 ```bash
-npx freellmapi setup-claude        # wire Claude Code
-npx freellmapi setup-codex         # wire Codex CLI
-npx freellmapi setup-dsh           # wire DeepSeek Harness
-npx freellmapi setup-mimo          # wire MiMo Code
-npx freellmapi setup-atomcode      # wire AtomCode
-npx freellmapi --dry-run setup-claude  # preview without writing
-npx freellmapi setup-claude --model gpt-4o  # pin a model
+npx free-rotation-llm setup-claude        # wire Claude Code
+npx free-rotation-llm setup-codex         # wire Codex CLI
+npx free-rotation-llm setup-dsh           # wire DeepSeek Harness
+npx free-rotation-llm setup-mimo          # wire MiMo Code
+npx free-rotation-llm setup-atomcode      # wire AtomCode
+npx free-rotation-llm --dry-run setup-claude  # preview without writing
+npx free-rotation-llm setup-claude --model gpt-4o  # pin a model
 ```
 
 Every generator (`cli/src/tools.ts:52-622`) fetches the live catalog, resolves `--model` against the unfiltered catalog (`c942352`), backs up existing config with a timestamped copy, merges without clobbering unrelated keys, and writes with `0600`.
@@ -40,16 +40,16 @@ Every generator (`cli/src/tools.ts:52-622`) fetches the live catalog, resolves `
 ## Zero-persistence launchers
 
 ```bash
-npx freellmapi launch            # injects FREELLMAPI_API_KEY + model into `claude`
-npx freellmapi launch-codex      # injects into `codex --profile NAME`
+npx free-rotation-llm launch            # injects FREELLMAPI_API_KEY + model into `claude`
+npx free-rotation-llm launch-codex      # injects into `codex --profile NAME`
 ```
 
 These do not write config files; they spawn the child process with `FREELLMAPI_API_KEY`/`FREELLMAPI_MODEL` in env only. Useful for ephemeral or shared machines.
 
-## `freellmapi doctor`
+## `free-rotation-llm doctor`
 
 ```bash
-npx freellmapi doctor
+npx free-rotation-llm doctor
 ```
 
 Proves a client's requests reach this gateway (checks routed `Authorization` header, catalog, live probe).

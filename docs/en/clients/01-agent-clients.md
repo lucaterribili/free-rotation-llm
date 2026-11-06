@@ -29,9 +29,9 @@ Use the generator instead of hand-editing a client configuration:
 
 ```bash
 export FREELLMAPI_API_KEY=<unified-key>   # or pass --api-key on each command
-npx freellmapi setup-claude --url http://localhost:3001 --dry-run
-npx freellmapi setup-claude --url http://localhost:3001
-npx freellmapi setup-dsh --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-claude --url http://localhost:3001 --dry-run
+npx free-rotation-llm setup-claude --url http://localhost:3001
+npx free-rotation-llm setup-dsh --url http://localhost:3001 --api-key <unified-key>
 ```
 
 `--dry-run` prints a diff. Real writes merge with the existing configuration
@@ -84,7 +84,7 @@ own, so nothing needs exporting. Both writes are structural merges: other
 routes, comments, and settings in the file are left as they were.
 
 ```bash
-npx freellmapi setup-dsh --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-dsh --url http://localhost:3001 --api-key <unified-key>
 npx @deepseek-ai/dsh web
 ```
 
@@ -111,7 +111,7 @@ generated file is the weakest layer and anything you hand-write in
 providers and settings already in `config.json` are left as they were.
 
 ```bash
-npx freellmapi setup-mimo --url http://localhost:3001
+npx free-rotation-llm setup-mimo --url http://localhost:3001
 export FREELLMAPI_API_KEY=<unified-key>
 mimo
 ```
@@ -137,7 +137,7 @@ tables, the two generated tables are replaced, and unrelated accounts,
 models, legacy providers and settings are preserved.
 
 ```bash
-npx freellmapi setup-atomcode --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-atomcode --url http://localhost:3001 --api-key <unified-key>
 atomcode
 ```
 
@@ -164,7 +164,7 @@ providers, `fallbacks` on the default model, and every other setting in the
 file are left as they were.
 
 ```bash
-npx freellmapi setup-openclaw --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-openclaw --url http://localhost:3001 --api-key <unified-key>
 npm install -g openclaw@latest --allow-scripts=openclaw
 openclaw agent exec --model freellmapi/auto "Say hello"   # no gateway daemon needed
 ```
@@ -197,7 +197,7 @@ exactly what `hermes setup` would do, and it is what lets a headless first
 run skip the wizard. Every other key in the file is left as it was.
 
 ```bash
-npx freellmapi setup-hermes --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-hermes --url http://localhost:3001 --api-key <unified-key>
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 hermes -z "Say hello"
 ```
@@ -224,7 +224,7 @@ created with mode 0600. Other providers and settings in both files are left
 as they were.
 
 ```bash
-npx freellmapi setup-pi --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-pi --url http://localhost:3001 --api-key <unified-key>
 npm install -g @earendil-works/pi-coding-agent
 pi -p "Say hello"
 ```
@@ -254,7 +254,7 @@ at `freellmapi/<model>`. The entry names its key with
 replaces only the `freellmapi` entry.
 
 ```bash
-npx freellmapi setup-reasonix --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-reasonix --url http://localhost:3001 --api-key <unified-key>
 npm install -g reasonix
 reasonix -p "Say hello"
 ```
@@ -283,7 +283,7 @@ providers, so the key lives in that file; the writer backs the file up first
 and keeps it at `0600`.
 
 ```bash
-npx freellmapi setup-zcode --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-zcode --url http://localhost:3001 --api-key <unified-key>
 ```
 
 Quit ZCode Desktop before running it so the app does not save its in-memory

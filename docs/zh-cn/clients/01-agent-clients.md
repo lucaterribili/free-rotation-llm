@@ -28,9 +28,9 @@
 
 ```bash
 export FREELLMAPI_API_KEY=<统一密钥>   # 或每条命令传 --api-key
-npx freellmapi setup-claude --url http://localhost:3001 --dry-run
-npx freellmapi setup-claude --url http://localhost:3001
-npx freellmapi setup-dsh --url http://localhost:3001 --api-key <统一密钥>
+npx free-rotation-llm setup-claude --url http://localhost:3001 --dry-run
+npx free-rotation-llm setup-claude --url http://localhost:3001
+npx free-rotation-llm setup-dsh --url http://localhost:3001 --api-key <统一密钥>
 ```
 
 `--dry-run` 打印差异。真实写入会与现有配置合并，并先创建带时间戳的备份。`--profile <name>` 创建一个命名的 Claude/Codex 配置档。实时 `/v1/models` 目录提供模型 id 和上下文窗口。
@@ -67,7 +67,7 @@ npx freellmapi setup-dsh --url http://localhost:3001 --api-key <统一密钥>
 `setup-dsh` 在那里添加一条 `freellmapi` 路由——`api: openai-completions`、网关的 `/v1` base URL、以及实时目录作为该路由的 `models` 列表（DSH 要求提供方在其自带目录里没有的模型也得列出来）——并把 `freellmapi/auto` 设为默认模型。密钥写进 `$DSH_HOME/.env`（权限 0600）作为 `FREELLMAPI_API_KEY`，这是 DSH 自己读取的环境层，所以无需导出。两次写入都是结构化合并：文件里其他的路由、注释、设置保持原样。
 
 ```bash
-npx freellmapi setup-dsh --url http://localhost:3001 --api-key <统一密钥>
+npx free-rotation-llm setup-dsh --url http://localhost:3001 --api-key <统一密钥>
 npx @deepseek-ai/dsh web
 ```
 
@@ -78,7 +78,7 @@ npx @deepseek-ai/dsh web
 [OpenClaw](https://docs.openclaw.ai/) 是常驻运行的个人助理，通过其网关接入 WhatsApp、Telegram、Discord 等渠道。它只读取一份 JSON5 文档 `~/.openclaw/openclaw.json`，每个模型端点都是 `models.providers` 下的一个条目；其自带目录不认识的提供方必须写明 `baseUrl`、`api` 和非空的 `models` 列表。`setup-openclaw` 在那里写入一个 `freellmapi` 提供方——`api: openai-completions`、网关的 `/v1` base URL、以及实时目录作为 `models` 列表——并把 `freellmapi/auto` 设为 `agents.defaults.model.primary` 的默认模型。密钥以 OpenClaw 自己的替换语法 `${FREELLMAPI_API_KEY}` 引用，值写进 `~/.openclaw/.env`（权限 0600），这是 OpenClaw 自行加载的全局环境文件，所以无需导出。两次写入都是结构化合并：其他提供方、默认模型上的 `fallbacks`、以及文件里的其他设置保持原样。
 
 ```bash
-npx freellmapi setup-openclaw --url http://localhost:3001 --api-key <统一密钥>
+npx free-rotation-llm setup-openclaw --url http://localhost:3001 --api-key <统一密钥>
 npm install -g openclaw@latest --allow-scripts=openclaw
 openclaw agent exec --model freellmapi/auto "Say hello"   # 无需启动网关守护进程
 ```
@@ -90,7 +90,7 @@ openclaw agent exec --model freellmapi/auto "Say hello"   # 无需启动网关�
 [Hermes Agent](https://hermes-agent.nousresearch.com/docs/) 是 Nous Research 的自我进化智能体，可在终端使用，也可通过其网关接入 Telegram、Discord 等聊天软件。`~/.hermes/config.yaml` 是端点的唯一事实来源：`OPENAI_BASE_URL` 只对 api.openai.com 生效，`OPENAI_API_KEY` 也只会发给 OpenAI 的主机，所以自定义端点必须写在 `model` 块里。`setup-hermes` 写入这个块——`provider: custom`、`api_mode: chat_completions`、网关的 `/v1` 作为 `base_url`、所选模型作为 `default` 并附上来自实时目录的 `context_length`——并以 Hermes 自己的替换语法 `api_key: "${FREELLMAPI_API_KEY}"` 引用密钥，值写进 `~/.hermes/.env`（权限 0600），Hermes 会自行加载。全新安装自带 `model: ""`（"尚未配置"的哨兵值）；替换它正是 `hermes setup` 会做的事，也正是无人值守首次运行能跳过向导的原因。文件里的其他键保持原样。
 
 ```bash
-npx freellmapi setup-hermes --url http://localhost:3001 --api-key <统一密钥>
+npx free-rotation-llm setup-hermes --url http://localhost:3001 --api-key <统一密钥>
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 hermes -z "Say hello"
 ```
@@ -102,7 +102,7 @@ hermes -z "Say hello"
 [Pi](https://pi.dev) 是一个极简的终端智能体框架，可用你自己的扩展、技能和提示词模板来定制。Pi 未内置的端点写在 `~/.pi/agent/models.json` 的 provider 条目里。`setup-pi` 在其中添加 `freellmapi` provider——`api: openai-completions`、网关的 `/v1` 作为 `baseUrl`，并列出实时目录中的全部模型及其上下文窗口（所选模型排在最前）——再在 `~/.pi/agent/settings.json` 中设置 `defaultProvider` 和 `defaultModel`，让全新启动的 `pi` 直接使用它。Pi 不会自行加载 `.env` 文件，所以密钥直接写入 `models.json`（以 0600 权限创建）。两个文件中的其他 provider 和设置保持原样。
 
 ```bash
-npx freellmapi setup-pi --url http://localhost:3001 --api-key <统一密钥>
+npx free-rotation-llm setup-pi --url http://localhost:3001 --api-key <统一密钥>
 npm install -g @earendil-works/pi-coding-agent
 pi -p "Say hello"
 ```
@@ -114,7 +114,7 @@ pi -p "Say hello"
 [Reasonix](https://github.com/esengine/DeepSeek-Reasonix) 是为 DeepSeek 原生打造、围绕前缀缓存稳定性设计的终端编程智能体。每个端点都是 `~/.reasonix/config.toml`（Windows 上为 `%APPDATA%\reasonix`，设置了 `$REASONIX_HOME` 时以其为准）中的一个 `[[providers]]` 条目。`setup-reasonix` 添加一个名为 `freellmapi` 的条目——`kind = "openai"`、网关的 `/v1` 作为 `base_url`，并列出实时目录中的全部模型（所选模型排在最前）——并把 `default_model` 指向 `freellmapi/<model>`。条目用 `api_key_env = "FREELLMAPI_API_KEY"` 引用密钥，密钥值写入 Reasonix 自行加载的 `~/.reasonix/.env`（0600），无需 export。其他 `[[providers]]` 条目和设置保持原样，重复运行只替换 `freellmapi` 条目。
 
 ```bash
-npx freellmapi setup-reasonix --url http://localhost:3001 --api-key <统一密钥>
+npx free-rotation-llm setup-reasonix --url http://localhost:3001 --api-key <统一密钥>
 npm install -g reasonix
 reasonix -p "Say hello"
 ```
@@ -126,7 +126,7 @@ reasonix -p "Say hello"
 [ZCode](https://zcode.z.ai) 是 Z.ai 为其 GLM 模型打造的编程智能体。桌面端和 CLI 共用同一个 provider 注册表 `~/.zcode/v2/provider_config.json`（可用 `ZCODE_PERSONAL_PROVIDER_CONFIG_FILE` 改变位置）。`setup-zcode` 会在其中添加一个 `freellmapi` provider：`api-key` 访问配置、指向网关 `/v1` 的 `openai-chat-completions` 端点，以及目录中每个模型的一条模型规则（含上下文和输出上限），并把 `freellmapi/auto` 设为默认模型。其他 provider、它们的模型规则和 provider 顺序都会保留，重复运行只替换 `freellmapi` 的条目。ZCode 对自定义 provider 不做环境变量查找，因此密钥保存在该文件中；写入前会先备份，并以 `0600` 权限保护。
 
 ```bash
-npx freellmapi setup-zcode --url http://localhost:3001 --api-key <统一密钥>
+npx free-rotation-llm setup-zcode --url http://localhost:3001 --api-key <统一密钥>
 ```
 
 运行前请退出 ZCode 桌面端，以免它把内存中的注册表写回该文件。可在模型选择器（或 CLI 的 `/model`）中选择其他 `freellmapi/<model>`。`--profile <name>` 改为添加第二个 `freellmapi-<name>` provider。ZCode 的每个请求都带有自己的 `x-zcode-app-version` 和 `x-title: Z Code@…` 请求头，Agents 页面的"最近出现"徽章据此识别。旧的 `~/.zcode/v2/config.json` 和 `~/.zcode/cli/config.json` 只在迁移时读取一次，修改它们不会生效。

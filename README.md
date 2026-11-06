@@ -116,7 +116,7 @@ The full list, with per-model rate limits, context windows, and free-token budge
 Most agents configure themselves with one command that reads your live catalog, backs up the existing config and merges into it:
 
 ```bash
-npx freellmapi setup-claude --url http://localhost:3001 --api-key <unified-key>
+npx free-rotation-llm setup-claude --url http://localhost:3001 --api-key <unified-key>
 ```
 
 **[All supported agents and their setup commands →](docs/en/clients/02-supported-agents.md)** · [Per-tool recipes, MCP server and URL tokens →](docs/en/clients/01-agent-clients.md)
@@ -180,7 +180,7 @@ Installers are not published for this fork yet: build the app from source. No ac
 
 ## Works with OpenAI-compatible clients
 
-Anything that can target an OpenAI-compatible base URL works: set it to `http://localhost:3001/v1` with the unified key from the dashboard. Every generator supports `--dry-run`; `npx freellmapi launch` (Claude Code) and `launch-codex` (Codex) keep credentials out of config files entirely. The router also doubles as an MCP server your agents can introspect mid-session.
+Anything that can target an OpenAI-compatible base URL works: set it to `http://localhost:3001/v1` with the unified key from the dashboard. Every generator supports `--dry-run`; `npx free-rotation-llm launch` (Claude Code) and `launch-codex` (Codex) keep credentials out of config files entirely. The router also doubles as an MCP server your agents can introspect mid-session.
 
 **ChatGPT** connects to the same local router through a private Secure MCP Tunnel. The
 `ask_freellmapi` MCP tool routes a ChatGPT-requested task through `/v1/chat/completions` and
@@ -189,7 +189,7 @@ URL and bearer authentication live in the tunnel-client configuration; the defau
 set with `MCP_INFERENCE_DEFAULT_MODEL` (`auto` when unset). No key belongs in Git or in the
 MCP URL. **[ChatGPT setup →](docs/en/clients/01-agent-clients.md#chatgpt-private-secure-mcp-tunnel)**
 
-Provider keys can be managed from the terminal too, with a dashboard session token (`FREELLMAPI_DASHBOARD_TOKEN` or `--token`): `npx freellmapi keys add|list|remove|test <platform>`, where `keys test` re-checks stored keys. See [cli/README.md](cli/README.md#provider-keys).
+Provider keys can be managed from the terminal too, with a dashboard session token (`FREELLMAPI_DASHBOARD_TOKEN` or `--token`): `npx free-rotation-llm keys add|list|remove|test <platform>`, where `keys test` re-checks stored keys. See [cli/README.md](cli/README.md#provider-keys).
 
 Free Rotation LLM Provider is local-first and single-user by design. Your provider keys stay in your SQLite database, encrypted at rest, and requests go from your machine to the upstream providers you enabled.
 

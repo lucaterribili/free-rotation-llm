@@ -77,7 +77,7 @@ function claude(ctx: GenerateContext): Generation {
       ctx.profile === 'default'
         ? 'Claude Code will read this configuration automatically.'
         : `Launch with CLAUDE_CONFIG_DIR=${directory} claude`,
-      'For zero-persistence credentials, prefer: freellmapi launch',
+      'For zero-persistence credentials, prefer: free-rotation-llm launch',
     ],
   };
 }

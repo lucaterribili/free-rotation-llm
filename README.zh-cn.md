@@ -129,7 +129,7 @@
 
 </div>
 
-其中大多数一条命令就能配好：`npx freellmapi setup-claude`、`setup-codex`、`setup-aider`，还有另外十几个生成器。它们会拉取你当前的实时目录，备份已有配置，并且绝不覆盖你已经写好的内容。Claude Code 和 Codex 另有零留存启动器（`freellmapi launch`、`freellmapi launch-codex`），只把凭据注入子进程。Zed 和 JetBrains AI 通过可选的 [Ollama 模拟](docs/en/clients/01-agent-clients.md#ollama-clients) 接入；Gemini CLI 走它自己的 `/v1beta` 协议。
+其中大多数一条命令就能配好：`npx free-rotation-llm setup-claude`、`setup-codex`、`setup-aider`，还有另外十几个生成器。它们会拉取你当前的实时目录，备份已有配置，并且绝不覆盖你已经写好的内容。Claude Code 和 Codex 另有零留存启动器（`free-rotation-llm launch`、`free-rotation-llm launch-codex`），只把凭据注入子进程。Zed 和 JetBrains AI 通过可选的 [Ollama 模拟](docs/en/clients/01-agent-clients.md#ollama-clients) 接入；Gemini CLI 走它自己的 `/v1beta` 协议。
 
 各工具的具体配方、setup CLI 参考、给无法发送请求头的客户端用的可撤销 URL 令牌，以及 MCP 服务，都在 **[客户端与编程智能体 →](docs/zh-cn/clients/01-agent-clients.md)**
 
@@ -196,10 +196,10 @@ macOS 要求 12 Monterey 或更高版本；Apple Silicon 请选择 **arm64**，I
 最快的配置方式是根据你服务器上实际可用的模型生成：
 
 ```bash
-npx freellmapi setup-claude --url http://localhost:3001 --api-key <统一密钥>
+npx free-rotation-llm setup-claude --url http://localhost:3001 --api-key <统一密钥>
 ```
 
-每个生成器都支持 `--dry-run`，改动已有文件前会先创建带时间戳的备份，并且是合并进用户配置而不是覆盖。启动器则把凭据完全挡在配置文件之外：Claude Code 用 `npx freellmapi launch`，Codex 用 `npx freellmapi launch-codex`。
+每个生成器都支持 `--dry-run`，改动已有文件前会先创建带时间戳的备份，并且是合并进用户配置而不是覆盖。启动器则把凭据完全挡在配置文件之外：Claude Code 用 `npx free-rotation-llm launch`，Codex 用 `npx free-rotation-llm launch-codex`。
 
 | 智能体 | 自动配置命令 | Base URL |
 | --- | --- | --- |
