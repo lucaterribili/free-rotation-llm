@@ -41,11 +41,15 @@ export function TokenUsageBar({ data }: { data: TokenUsageData }) {
 
   return (
     <section className="rounded-3xl border bg-card p-5">
-      <div className="flex items-baseline justify-between mb-3">
-        <h2 className="text-sm font-medium">{t('models.monthlyTokenBudget')}</h2>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
+        <div>
+          <h2 className="text-sm font-medium text-muted-foreground">{t('models.monthlyTokenBudget')}</h2>
+          <p className="mt-1 flex items-baseline gap-2">
+            <span className="text-4xl font-semibold tabular-nums tracking-tight">{formatTokens(remaining)}</span>
+            <span className="text-sm text-muted-foreground">{t('models.remaining')}</span>
+          </p>
+        </div>
         <span className="text-xs text-muted-foreground tabular-nums">
-          <span className="text-foreground font-medium">{formatTokens(remaining)}</span> {t('models.remaining')}
-          <span className="mx-1.5">·</span>
           {remainingPct} {t('models.of')} {formatTokens(totalBudget)}
           {totalUsed > 0 && (
             <>
@@ -60,7 +64,7 @@ export function TokenUsageBar({ data }: { data: TokenUsageData }) {
         </span>
       </div>
 
-      <div className="flex h-2.5 rounded-full overflow-hidden bg-muted">
+      <div className="flex h-2 overflow-hidden rounded-full bg-muted">
         {rows.map(m => (
           <div
             key={`${m.platform}:${m.modelId ?? m.displayName}`}

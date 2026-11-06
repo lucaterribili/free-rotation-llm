@@ -202,6 +202,28 @@ h1, h2 {
 /* Thin, quiet scrollbars. */
 * { scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--foreground) 22%, transparent) transparent; }
 
+/* ── Model registry ─────────────────────────────────────────────────────────
+   The model table keeps its table markup (and the row contract the tests rely
+   on) but lays every row out as a card on a grid. */
+.model-grid { display: block; width: 100%; min-width: 58rem; }
+.model-grid > thead, .model-grid > tbody { display: block; }
+.model-grid > thead > tr,
+.model-grid > tbody > tr {
+    display: grid;
+    grid-template-columns: 1.25rem 2.25rem minmax(15rem, 2.4fr) repeat(3, minmax(6rem, 1fr)) 3.5rem 4.5rem 6rem;
+    align-items: center;
+    column-gap: 0.75rem;
+}
+.model-grid > thead > tr { padding: 0 1rem 0.25rem; }
+.model-grid > tbody > tr {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+}
+.model-grid th, .model-grid td { padding: 0; width: auto; }
+
 /* ── Syntax highlighting (highlight.js spans, see lib/highlight.ts) ─────────
    One restrained palette per theme: keywords and tags carry the accent,
    strings warm, comments recede, everything else stays the text colour. */

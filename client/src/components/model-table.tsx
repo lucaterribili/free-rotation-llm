@@ -29,7 +29,7 @@ export function AxisBar({ value, color }: { value: number | undefined; color: st
   const v = value ?? 0
   return (
     <div className="flex items-center gap-1.5">
-      <div className="h-1.5 w-12 rounded-full bg-muted overflow-hidden">
+      <div className="h-1.5 min-w-8 flex-1 rounded-full bg-muted overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${Math.round(v * 100)}%`, backgroundColor: color }} />
       </div>
       <span className="font-mono text-[11px] text-muted-foreground tabular-nums w-7 text-right">
@@ -49,7 +49,7 @@ export function AxisNoData() {
   return (
     <Tooltip text={t('models.noDataTitle')}>
       <div className="flex items-center gap-1.5 cursor-help">
-        <div className="h-1.5 w-12 rounded-full border border-dashed border-muted-foreground/30" />
+        <div className="h-1.5 min-w-8 flex-1 rounded-full border border-dashed border-muted-foreground/30" />
         <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">{t('models.noData')}</span>
       </div>
     </Tooltip>
@@ -78,7 +78,7 @@ export function AxisRangeBar({ values, color }: { values: (number | undefined)[]
   if (lo === hi) return <AxisBar value={range.max} color={color} />
   return (
     <div className="flex items-center gap-1.5">
-      <div className="relative h-1.5 w-12 rounded-full bg-muted overflow-hidden">
+      <div className="relative h-1.5 min-w-8 flex-1 rounded-full bg-muted overflow-hidden">
         <div
           data-part="spread"
           className="absolute inset-y-0 left-0 rounded-full opacity-35"
@@ -103,18 +103,18 @@ export function ModelTableHead() {
   const { t } = useI18n()
   return (
     <thead>
-      <tr className="text-left text-muted-foreground border-b">
+      <tr className="text-left text-xs text-muted-foreground">
         <th className="py-2 pl-3 pr-1 w-6"></th>
-        <th className="py-2 pr-2 w-6 text-center font-medium">#</th>
+        <th className="text-center font-medium">#</th>
         <th className="py-2 pr-3 font-medium">{t('models.columnModel')}</th>
         <th className="py-2 pr-3 font-medium">
-          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#22c55e' }} />{t('strategies.weightReliability')}</span>
+          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: 'var(--ok)' }} />{t('strategies.weightReliability')}</span>
         </th>
         <th className="py-2 pr-3 font-medium">
-          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#3b82f6' }} />{t('strategies.weightSpeed')}</span>
+          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: 'var(--chart-5)' }} />{t('strategies.weightSpeed')}</span>
         </th>
         <th className="py-2 pr-3 font-medium">
-          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#a855f7' }} />{t('strategies.weightIntelligence')}</span>
+          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: 'var(--chart-2)' }} />{t('strategies.weightIntelligence')}</span>
         </th>
         <th className="py-2 pr-3 font-medium">
           <Tooltip text={t('strategies.guardrailsTooltip')}>
@@ -187,10 +187,10 @@ export function RowContent({
       <td className="py-2 pl-3 pr-1 w-6 align-middle">
         {draggable ? dragHandle : <span className="text-muted-foreground/30 select-none">·</span>}
       </td>
-      <td className="py-2 pr-2 w-6 text-center font-mono text-xs text-muted-foreground tabular-nums align-middle">{rank}</td>
+      <td className="py-2 pr-2 w-6 text-center text-base font-semibold text-muted-foreground tabular-nums align-middle">{rank}</td>
       <td className="py-2 pr-3 align-middle">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium text-sm">{row.displayName}</span>
+          <span className="text-[0.9375rem] font-semibold">{row.displayName}</span>
           <span className="text-xs text-muted-foreground" title={providerTitle}>
             {providerName ?? providerLabel(row)}
           </span>
@@ -251,9 +251,9 @@ export function RowContent({
           scorer only has its exploration priors, so show an explicit "no data"
           state instead of prior-valued bars (#580). Intelligence is catalog
           metadata and stays. */}
-      <td className="py-2 pr-3 align-middle">{row.totalRequests === 0 ? <AxisNoData /> : <AxisBar value={row.reliability} color="#22c55e" />}</td>
-      <td className="py-2 pr-3 align-middle">{row.totalRequests === 0 ? <AxisNoData /> : <AxisBar value={row.speed} color="#3b82f6" />}</td>
-      <td className="py-2 pr-3 align-middle"><AxisBar value={row.intelligence} color="#a855f7" /></td>
+      <td className="py-2 pr-3 align-middle">{row.totalRequests === 0 ? <AxisNoData /> : <AxisBar value={row.reliability} color="var(--ok)" />}</td>
+      <td className="py-2 pr-3 align-middle">{row.totalRequests === 0 ? <AxisNoData /> : <AxisBar value={row.speed} color="var(--chart-5)" />}</td>
+      <td className="py-2 pr-3 align-middle"><AxisBar value={row.intelligence} color="var(--chart-2)" /></td>
       <td className="py-2 pr-3 align-middle font-mono text-[11px] text-muted-foreground tabular-nums">
         {guard < 0.999 ? `×${guard.toFixed(2)}` : '—'}
       </td>
@@ -322,7 +322,7 @@ export function RankEditor({ rank, onMoveRank }: { rank: number; onMoveRank: (to
           if (e.key === 'Escape') cancel()
         }}
         aria-label={t('models.moveToRank')}
-        className="w-9 rounded border bg-background px-1 py-0.5 text-center font-mono text-xs tabular-nums"
+        className="w-11 rounded border bg-background px-1 py-0.5 text-center text-sm tabular-nums"
       />
     )
   }
@@ -332,7 +332,7 @@ export function RankEditor({ rank, onMoveRank }: { rank: number; onMoveRank: (to
       onClick={e => { e.stopPropagation(); settled.current = false; setDraft(String(rank)); setEditing(true) }}
       title={t('models.moveToRank')}
       aria-label={t('models.moveToRank')}
-      className="w-full text-center font-mono text-xs text-muted-foreground tabular-nums underline decoration-dotted decoration-transparent underline-offset-2 hover:decoration-current hover:text-foreground transition-colors"
+      className="w-full text-center text-base font-semibold text-muted-foreground tabular-nums underline decoration-dotted decoration-transparent underline-offset-2 hover:decoration-current hover:text-foreground transition-colors"
     >
       {rank}
     </button>
@@ -396,7 +396,7 @@ export function GroupHeaderCells({ group, rank, dragHandle, editableRank, onMove
   return (
     <>
       <td className="py-2 pl-3 pr-1 w-6 align-middle">{dragHandle ?? <span className="text-muted-foreground/30 select-none">·</span>}</td>
-      <td className="py-2 pr-2 w-6 text-center font-mono text-xs text-muted-foreground tabular-nums align-middle">
+      <td className="py-2 pr-2 w-6 text-center text-base font-semibold text-muted-foreground tabular-nums align-middle">
         {editableRank && onMoveRank
           ? <RankEditor rank={rank} onMoveRank={onMoveRank} />
           : rank}
@@ -404,7 +404,7 @@ export function GroupHeaderCells({ group, rank, dragHandle, editableRank, onMove
       <td className="py-2 pr-3 align-middle">
         <div className="flex items-center gap-1.5 min-w-0">
           <Link to={`/models/chat/${detailId}`} aria-label={t('models.viewProviders')} onClick={e => e.stopPropagation()} className="flex items-center gap-2 flex-wrap text-left min-w-0">
-            <span className="font-medium text-sm">{group.label}</span>
+            <span className="text-[0.9375rem] font-semibold">{group.label}</span>
             {solo
               ? <span className="text-xs text-muted-foreground" title={memberEndpointTitle(group.members[0], siblings)}>{memberProviderLabel(group.members[0], siblings)}</span>
               : <Tooltip text={t('models.servedBy', { providers: group.members.map(m => memberProviderLabel(m, siblings)).join('\n') })}>
@@ -439,9 +439,9 @@ export function GroupHeaderCells({ group, rank, dragHandle, editableRank, onMove
           </span>
         </div>
       </td>
-      <td className="py-2 pr-3 align-middle">{measured.length === 0 ? <AxisNoData /> : <AxisRangeBar values={measured.map(m => m.reliability)} color="#22c55e" />}</td>
-      <td className="py-2 pr-3 align-middle">{measured.length === 0 ? <AxisNoData /> : <AxisRangeBar values={measured.map(m => m.speed)} color="#3b82f6" />}</td>
-      <td className="py-2 pr-3 align-middle"><AxisRangeBar values={group.members.map(m => m.intelligence)} color="#a855f7" /></td>
+      <td className="py-2 pr-3 align-middle">{measured.length === 0 ? <AxisNoData /> : <AxisRangeBar values={measured.map(m => m.reliability)} color="var(--ok)" />}</td>
+      <td className="py-2 pr-3 align-middle">{measured.length === 0 ? <AxisNoData /> : <AxisRangeBar values={measured.map(m => m.speed)} color="var(--chart-5)" />}</td>
+      <td className="py-2 pr-3 align-middle"><AxisRangeBar values={group.members.map(m => m.intelligence)} color="var(--chart-2)" /></td>
       <td className="py-2 pr-3 align-middle font-mono text-[11px] text-muted-foreground tabular-nums">{guard < 0.999 ? `×${guard.toFixed(2)}` : '—'}</td>
       <td className="py-2 pr-3 align-middle text-right font-mono text-xs font-medium tabular-nums">
         {solo ? (
@@ -516,7 +516,7 @@ export function SortableGroupRow({ group, rank, editableRank, onMoveRank, onTogg
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       onClick={() => navigate(`/models/chat/${detailId}`)}
-      className={`group/row border-b last:border-0 bg-card cursor-pointer transition-colors hover:[&>td]:bg-muted/50 [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg ${isDragging ? 'opacity-50' : ''} ${anyEnabled ? (depleted ? 'opacity-60' : '') : 'opacity-50'}`}
+      className={`group/row cursor-pointer transition-[border-color,box-shadow] hover:border-brand/40 hover:shadow-sm ${isDragging ? 'opacity-50' : ''} ${anyEnabled ? (depleted ? 'opacity-60' : '') : 'opacity-50'}`}
     >
       <GroupHeaderCells group={group} rank={rank} dragHandle={handle} editableRank={editableRank} onMoveRank={onMoveRank} onToggleGroup={onToggleGroup} onTogglePrimary={onTogglePrimary} allRows={allRows} rateUsage={rateUsage} />
     </tr>

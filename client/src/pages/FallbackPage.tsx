@@ -409,39 +409,56 @@ export default function FallbackPage() {
 
           {/* Pills left, the quiet "More options" disclosure right. Everything
               secondary hangs off that toggle so the card reads as one choice. */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="inline-flex flex-wrap items-center gap-1 rounded-xl border p-1">
-              {STRATEGIES.map(s => {
-                const pillClass = `px-3 py-1.5 text-xs rounded-lg transition-colors ${
-                  s.key === strategy
-                    ? 'bg-accent text-accent-foreground font-medium shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--brand)_35%,transparent)]'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`
-                // Decision with nothing able to decide (#1354): the pill opens a
-                // setup guide instead of switching to a strategy that would
-                // route everything as Balanced.
-                const needsSetup = s.key === 'decision' && strategy !== 'decision' && routing?.decision && !routing.decision.ready
-                // The guide explains itself, so it skips the hover blurb, which
-                // would otherwise sit on top of the guide's buttons.
-                if (needsSetup && routing?.decision) {
-                  return (
-                    <DecisionSetupGuide key={s.key} status={routing.decision} className={pillClass}>
-                      {t(`strategies.${s.tKey}`)}
-                    </DecisionSetupGuide>
-                  )
-                }
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+            {STRATEGIES.map(s => {
+              const active = s.key === strategy
+              const tileClass = `flex h-full flex-col items-start gap-1.5 rounded-xl border p-3 text-left transition-colors ${
+                active
+                  ? 'border-brand/50 bg-accent/60 shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--brand)_30%,transparent)]'
+                  : 'hover:border-foreground/25 hover:bg-muted/50'
+              }`
+              const tileBody = (
+                <>
+                  <span className="flex w-full items-center justify-between gap-2 text-sm font-medium">
+                    {t(`strategies.${s.tKey}`)}
+                    <span
+                      aria-hidden="true"
+                      className={`size-2 shrink-0 rounded-full ${active ? 'bg-brand' : 'border border-muted-foreground/30'}`}
+                    />
+                  </span>
+                  <span className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
+                    {t(`strategies.${s.tKey}Blurb`)}
+                  </span>
+                </>
+              )
+              // Decision with nothing able to decide (#1354): the tile opens a
+              // setup guide instead of switching to a strategy that would
+              // route everything as Balanced.
+              const needsSetup = s.key === 'decision' && strategy !== 'decision' && routing?.decision && !routing.decision.ready
+              if (needsSetup && routing?.decision) {
                 return (
-                  <Tooltip key={s.key} text={t(`strategies.${s.tKey}Blurb`)}>
-                    <button
-                      disabled={strategyMutation.isPending}
-                      onClick={() => strategyMutation.mutate({ strategy: s.key })}
-                      className={pillClass}
-                    >
-                      {t(`strategies.${s.tKey}`)}
-                    </button>
-                  </Tooltip>
+                  <DecisionSetupGuide key={s.key} status={routing.decision} className={tileClass}>
+                    {tileBody}
+                  </DecisionSetupGuide>
                 )
-              })}
+              }
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  aria-pressed={active}
+                  disabled={strategyMutation.isPending}
+                  onClick={() => strategyMutation.mutate({ strategy: s.key })}
+                  className={tileClass}
+                >
+                  {tileBody}
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               {strategy === 'custom' && routing && (
                 <CustomWeightsPopover
                   saved={routing.customWeights}
@@ -457,7 +474,6 @@ export default function FallbackPage() {
                 />
               )}
             </div>
-
             <button
               type="button"
               onClick={toggleOptions}
@@ -701,8 +717,8 @@ export default function FallbackPage() {
               />
             ) : draggable ? (
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleGroupedDragEnd}>
-                <div className="rounded-2xl border overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto">
+                  <table className="model-grid text-sm">
                     <ModelTableHead />
                     <SortableContext items={renderedGroups.map(g => `grp:${g.key}`)} strategy={verticalListSortingStrategy}>
                       <tbody>
@@ -715,15 +731,15 @@ export default function FallbackPage() {
                 </div>
               </DndContext>
             ) : (
-              <div className="rounded-2xl border overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+                <table className="model-grid text-sm">
                   <ModelTableHead />
                   <tbody>
                     {renderedGroups.map(g => (
                       <tr
                         key={g.key}
                         onClick={() => navigate(`/models/chat/${encodeURIComponent(g.members[0].canonicalId ?? g.members[0].modelId)}`)}
-                        className={`group/row border-b last:border-0 cursor-pointer transition-colors hover:[&>td]:bg-muted/50 [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg ${g.members.some(m => m.enabled) ? (isGroupDepleted(g.members, rateUsageByModel) ? 'opacity-60' : '') : 'opacity-50'}`}
+                        className={`group/row cursor-pointer transition-[border-color,box-shadow] hover:border-brand/40 hover:shadow-sm ${g.members.some(m => m.enabled) ? (isGroupDepleted(g.members, rateUsageByModel) ? 'opacity-60' : '') : 'opacity-50'}`}
                       >
                         <GroupHeaderCells group={g} rank={rankByKey.get(g.key) ?? 0} onToggleGroup={handleGroupToggle} onTogglePrimary={onTogglePrimary} allRows={rows} rateUsage={rateUsageByModel} />
                       </tr>

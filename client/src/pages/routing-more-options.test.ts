@@ -3,9 +3,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
-// The Routing strategy card opens on the strategy pills and nothing else. The
+// The Routing strategy card opens on the strategy tiles and nothing else. The
 // secondary knobs added since (key selection, exploration, peak hours) sit
-// behind a "More options" disclosure on the right of the pill row. This pins
+// behind a "More options" disclosure on the right, under the tiles. This pins
 // that layout: the knobs are easy to drag back out into the open by accident,
 // and the "(peak hours)" marker on the weight summary must stay out of the
 // disclosure because it explains what routing is doing right now.
@@ -57,8 +57,8 @@ describe('routing strategy "More options" disclosure', () => {
     expect(at).toBeLessThan(disclosureStart)
   })
 
-  it('puts the toggle on the strategy pill row', () => {
-    expect(page).toContain('<div className="flex flex-wrap items-center justify-between gap-3">')
+  it('puts the toggle in the row right under the strategy tiles', () => {
+    expect(page).toContain('<div className="mt-3 flex flex-wrap items-center justify-between gap-3">')
     expect(page).toContain("{t('strategies.moreOptions')}")
     expect(page).toContain('<ChevronDown')
   })
