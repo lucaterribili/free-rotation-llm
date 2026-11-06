@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronRight, CircleAlert, FileText, Globe, X } from 'lucide-react'
+import { ChevronRight, CircleAlert, FileText, Globe, RotateCw, X } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
 import { buildModelOptions } from '@/lib/model-groups'
 import type { Chain } from '@/components/chain-manager'
@@ -1066,12 +1066,17 @@ export default function PlaygroundPage() {
           {/* The chat sits in a centred column; the composer below shares its width. */}
           <div className="mx-auto h-full w-full max-w-3xl space-y-4">
           {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-center">
-              <div className="space-y-2 max-w-sm">
-                <p className="text-base font-medium">{t('playground.emptyTitle')}</p>
-                <p className="text-sm text-muted-foreground">
-                  {t('playground.emptyDescription', { model: activeModelLabel })}
-                </p>
+            <div className="flex h-full items-center justify-center text-center">
+              <div className="max-w-md space-y-5">
+                <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand text-brand-foreground shadow-sm">
+                  <RotateCw className="size-7" strokeWidth={2} />
+                </span>
+                <div className="space-y-2">
+                  <p className="text-2xl font-semibold tracking-tight">{t('playground.emptyTitle')}</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {t('playground.emptyDescription', { model: activeModelLabel })}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
@@ -1085,16 +1090,21 @@ export default function PlaygroundPage() {
                 // that IS the bubble's content for the moment.
                 const showBubble = msg.role === 'user' || msg.content.length > 0 || !!msg.reasoning
                 return (
-                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start gap-3'}`}>
+                    {msg.role === 'assistant' && showBubble && !msg.isError && (
+                      <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-accent text-brand">
+                        <RotateCw className="size-3.5" strokeWidth={2.25} />
+                      </span>
+                    )}
                     {/* The user speaks in a bubble; the assistant answers as plain
                         text across the whole column — no box, no padding, no fill.
                         Errors keep their tinted box so they read as errors. */}
-                    <div className={`flex flex-col gap-1 ${msg.role === 'user' ? 'max-w-[80%] items-end' : 'w-full items-start'}`}>
+                    <div className={`flex flex-col gap-1 ${msg.role === 'user' ? 'max-w-[80%] items-end' : 'min-w-0 flex-1 items-start'}`}>
                       {showBubble && (
                         <div
                           className={`group relative text-sm leading-relaxed ${
                             msg.role === 'user'
-                              ? 'rounded-2xl bg-primary px-4 py-2.5 text-primary-foreground'
+                              ? 'rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-primary-foreground shadow-sm'
                               : msg.isError
                                 ? 'rounded-2xl border border-destructive/25 bg-destructive/10 px-4 py-2.5 text-destructive'
                                 : 'w-full'

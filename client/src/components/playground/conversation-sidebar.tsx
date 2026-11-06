@@ -132,7 +132,7 @@ export function ConversationSidebar({
             </Button>
           </div>
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
             className="w-full justify-center gap-2"
             onClick={onNew}
@@ -171,7 +171,7 @@ export function ConversationSidebar({
                     ) : (
                       <div
                         className={`group flex items-center gap-0.5 rounded-lg pr-0.5 transition-colors ${
-                          isActive ? 'bg-muted' : 'hover:bg-muted/60'
+                          isActive ? 'bg-accent text-accent-foreground' : 'hover:bg-muted/60'
                         }`}
                       >
                         <button

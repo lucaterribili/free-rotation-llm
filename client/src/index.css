@@ -193,10 +193,13 @@ h1, h2 {
     color: var(--muted-foreground);
 }
 
-/* Focus is the accent, drawn as a crisp ring. */
-:where(input, textarea, select, button, a, [role="switch"], [role="tab"]):focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+/* Focus is the accent, drawn as a crisp ring. In the base layer so a component's
+   own `outline-none` / `focus-visible:ring-*` utilities still win. */
+@layer base {
+    :where(input, textarea, select, button, a, [role="switch"], [role="tab"]):focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+    }
 }
 
 /* Thin, quiet scrollbars. */
