@@ -337,14 +337,12 @@ function formatTokens(n?: number): string {
 
 function Stat({ icon: Icon, label, value, sub, hint, className }: { icon: LucideIcon; label: string; value: string | number; sub?: string; hint?: string; className?: string }) {
   const card = (
-    <div data-slot="card" className="bg-card px-4 py-3 h-full">
+    <div data-slot="card" className="h-full rounded-xl border bg-card px-5 py-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</p>
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-          <Icon className="size-3.5" aria-hidden="true" />
-        </span>
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <Icon className="size-4 shrink-0 text-muted-foreground/60" aria-hidden="true" />
       </div>
-      <p className={`text-xl font-semibold tabular-nums mt-1 ${className ?? ''}`}>{value}</p>
+      <p className={`mt-2 text-[1.75rem] font-semibold leading-none tracking-tight tabular-nums ${className ?? ''}`}>{value}</p>
       {/* Optional second figure, so one card can carry two related numbers
           instead of spending another slot in the summary row. */}
       {sub ? <p className="text-[11px] text-muted-foreground tabular-nums truncate">{sub}</p> : null}
@@ -357,8 +355,8 @@ function Stat({ icon: Icon, label, value, sub, hint, className }: { icon: Lucide
 
 function Panel({ icon: Icon, title, actions, children }: { icon: LucideIcon; title: string; actions?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div data-slot="card" className="bg-card">
-      <div className="px-4 py-3 border-b flex flex-wrap items-center justify-between gap-2">
+    <div data-slot="card" className="rounded-xl border bg-card">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3.5">
         <h3 className="flex items-center gap-2 text-sm font-medium">
           <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
           {title}
@@ -526,7 +524,7 @@ function RequestDetailDialog({ requestId, onClose }: { requestId: number | null;
 
 const axisStyle = { fontSize: 11, fill: 'var(--muted-foreground)' } as const
 const gridStyle = 'var(--border)'
-const primaryFill = 'var(--foreground)'
+const primaryFill = 'var(--chart-1)'
 const tooltipStyle = { backgroundColor: 'var(--popover)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 } as const
 
 // The timeline endpoint buckets on the viewer's wall clock (the query sends
@@ -545,17 +543,13 @@ function formatTimelineTick(value: string): string {
   })
 }
 
-// Two categorical series hues, validated against the app's actual chart
-// surfaces (light card #ffffff, dark card #101010) with the dataviz palette
-// checker. Slot A (blue) = the "average / input" series; slot B (aqua) = the
-// "p95 / output" series. The app's own --chart-* tokens are all grayscale
-// (zero chroma), which fails the CVD separation check for a two-series chart,
-// so we take the nearest passing categorical hues and theme them here.
+// Two categorical series hues, taken from the theme's own --chart-* tokens
+// (teal and indigo; both have a dark-mode variant). Slot A = the "average /
+// input" series; slot B = the "p95 / output" series.
 const seriesA = 'var(--series-a)'
 const seriesB = 'var(--series-b)'
 const chartVars = `
-.analytics-viz { --series-a: #2a78d6; --series-b: #1baf7a; }
-.dark .analytics-viz { --series-a: #3987e5; --series-b: #199e70; }
+.analytics-viz { --series-a: var(--chart-1); --series-b: var(--chart-2); }
 `
 
 export default function AnalyticsPage() {
@@ -760,7 +754,7 @@ export default function AnalyticsPage() {
           {summaryLoading ? (
             // Same count as the cards below, cache card included, so the row
             // does not reflow when the summary lands.
-            Array.from({ length: cacheStats?.enabled ? 9 : 8 }).map((_, i) => <Skeleton key={i} className="h-[74px] rounded-3xl" />)
+            Array.from({ length: cacheStats?.enabled ? 9 : 8 }).map((_, i) => <Skeleton key={i} className="h-[104px] rounded-xl" />)
           ) : (
             <>
               <Stat icon={Activity} label={t('analytics.requests')} value={summary?.totalRequests ?? 0} hint={requestsHint} />
