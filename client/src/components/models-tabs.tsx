@@ -11,7 +11,7 @@ export function ModelsTabs() {
   const { t } = useI18n()
   const tab = (isActive: boolean) =>
     `-mb-px inline-flex items-center gap-1.5 border-b-2 px-0.5 pb-2.5 pt-1 text-sm transition-colors ${
-      isActive ? 'border-foreground font-medium text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
+      isActive ? 'border-brand font-medium text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
     }`
   return (
     <div className="flex max-w-full gap-5 overflow-x-auto border-b md:hidden [&>a]:shrink-0">

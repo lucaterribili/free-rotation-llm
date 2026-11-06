@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { KeyRound, LogOut, Menu, MoreHorizontal, RefreshCw, Search, Settings, Sparkles } from 'lucide-react'
+import { Activity, Bot, KeyRound, Layers, LogOut, Menu, MoreHorizontal, Play, RefreshCw, RotateCw, Search, Settings, Sparkles, type LucideIcon } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -70,13 +70,13 @@ const queryClient = new QueryClient({
   }),
 })
 
-const navItems = [
-  { to: '/models', labelKey: 'nav.models' },
-  { to: '/playground', labelKey: 'nav.playground' },
-  { to: '/keys', labelKey: 'nav.keys' },
-  { to: '/agents', labelKey: 'nav.agents' },
-  { to: '/analytics', labelKey: 'nav.analytics' },
-  { to: '/premium', labelKey: 'nav.premium' },
+const navItems: { to: string; labelKey: string; icon: LucideIcon }[] = [
+  { to: '/models', labelKey: 'nav.models', icon: Layers },
+  { to: '/playground', labelKey: 'nav.playground', icon: Play },
+  { to: '/keys', labelKey: 'nav.keys', icon: KeyRound },
+  { to: '/agents', labelKey: 'nav.agents', icon: Bot },
+  { to: '/analytics', labelKey: 'nav.analytics', icon: Activity },
+  { to: '/premium', labelKey: 'nav.premium', icon: Sparkles },
 ]
 
 // The modality pages behind "Models"; surfaced in the nav dropdown and
@@ -122,27 +122,22 @@ const navMenus: Record<
 
 const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform)
 
-function SideLink({ to, index, children }: { to: string; index: string; children: React.ReactNode }) {
+function SideLink({ to, icon: Icon, children }: { to: string; icon: LucideIcon; children: React.ReactNode }) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
         cn(
-          'group relative flex items-baseline gap-3 py-1.5 pl-3 text-[0.95rem] transition-colors',
-          isActive ? 'font-medium text-foreground' : 'text-muted-foreground hover:text-foreground',
+          'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+          isActive
+            ? 'bg-accent font-medium text-accent-foreground'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
         )
       }
     >
       {({ isActive }) => (
         <>
-          <span
-            aria-hidden="true"
-            className={cn(
-              'absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 transition-colors',
-              isActive ? 'bg-brand' : 'bg-transparent group-hover:bg-border',
-            )}
-          />
-          <span className="eyebrow w-5 shrink-0 tabular-nums">{index}</span>
+          <Icon className={cn('size-4 shrink-0 transition-colors', isActive ? 'text-brand' : 'text-muted-foreground group-hover:text-foreground')} />
           {children}
         </>
       )}
@@ -156,8 +151,10 @@ function SubLink({ to, children }: { to: string; children: React.ReactNode }) {
       to={to}
       className={({ isActive }) =>
         cn(
-          'block py-1 pl-11 text-[0.8125rem] transition-colors',
-          isActive ? 'font-medium text-foreground' : 'text-muted-foreground hover:text-foreground',
+          '-ml-px block border-l py-1 pl-3 text-[0.8125rem] transition-colors',
+          isActive
+            ? 'border-brand font-medium text-foreground'
+            : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground',
         )
       }
     >
@@ -168,11 +165,13 @@ function SubLink({ to, children }: { to: string; children: React.ReactNode }) {
 
 function Brand() {
   return (
-    <Link to="/" className="block transition-opacity hover:opacity-75">
-      <span className="font-heading text-[1.4rem] leading-[1.05] tracking-tight">
-        Free Rotation
-        <br />
-        LLM Provider
+    <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground">
+        <RotateCw className="size-[1.1rem]" strokeWidth={2.25} />
+      </span>
+      <span className="leading-tight">
+        <span className="block text-[0.95rem] font-semibold tracking-tight">Free Rotation</span>
+        <span className="block text-xs text-muted-foreground">LLM Provider</span>
       </span>
     </Link>
   )
@@ -311,20 +310,20 @@ function Navbar() {
         className="hidden shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground md:sticky md:top-0 md:flex md:h-dvh md:w-64"
         style={isDesktopApp ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
       >
-        <div className={cn('px-6 pb-8 pt-9', isMacDesktop && 'pt-14')}>
+        <div className={cn('px-5 pb-7 pt-6', isMacDesktop && 'pt-12')}>
           <Brand />
         </div>
-        <nav className="flex-1 overflow-y-auto px-3 pb-4" style={noDrag}>
-          {navItems.map((item, index) => {
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-4" style={noDrag}>
+          {navItems.map((item) => {
             const menu = navMenus[item.to]
             const open = menu?.isActive(location.pathname)
             return (
               <div key={item.to}>
-                <SideLink to={item.to} index={String(index + 1).padStart(2, '0')}>
+                <SideLink to={item.to} icon={item.icon}>
                   {t(item.labelKey)}
                 </SideLink>
                 {menu && open && (
-                  <div className="mb-1">
+                  <div className="mb-1.5 ml-[1.45rem] mt-0.5 border-l pl-2">
                     {menu.items.map((entry) => (
                       <SubLink key={entry.to} to={entry.to}>
                         {t(entry.labelKey)}
@@ -452,7 +451,7 @@ function PageContainer({ children }: { children: ReactNode }) {
   const location = useLocation()
   const fullBleed = FULL_BLEED_ROUTES.has(location.pathname)
   return (
-    <main className={fullBleed ? 'flex min-h-0 flex-1 flex-col' : 'mx-auto w-full max-w-6xl px-6 py-10 md:px-12 md:py-12'}>
+    <main className={fullBleed ? 'flex min-h-0 flex-1 flex-col' : 'mx-auto w-full max-w-6xl px-6 py-8 md:px-10 md:py-10'}>
       {children}
     </main>
   )
