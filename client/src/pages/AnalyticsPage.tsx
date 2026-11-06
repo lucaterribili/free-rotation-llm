@@ -337,7 +337,7 @@ function formatTokens(n?: number): string {
 
 function Stat({ icon: Icon, label, value, sub, hint, className }: { icon: LucideIcon; label: string; value: string | number; sub?: string; hint?: string; className?: string }) {
   const card = (
-    <div className="rounded-3xl border bg-card px-4 py-3">
+    <div data-slot="card" className="bg-card px-4 py-3 h-full">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</p>
         <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
@@ -357,7 +357,7 @@ function Stat({ icon: Icon, label, value, sub, hint, className }: { icon: Lucide
 
 function Panel({ icon: Icon, title, actions, children }: { icon: LucideIcon; title: string; actions?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="rounded-3xl border bg-card">
+    <div data-slot="card" className="bg-card">
       <div className="px-4 py-3 border-b flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center gap-2 text-sm font-medium">
           <Icon className="size-4 text-muted-foreground" aria-hidden="true" />

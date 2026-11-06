@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ChevronDown, KeyRound, LogOut, Menu, MoreHorizontal, RefreshCw, Search, Settings, Sparkles } from 'lucide-react'
+import { KeyRound, LogOut, Menu, MoreHorizontal, RefreshCw, Search, Settings, Sparkles } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -27,6 +27,7 @@ import { NewBuildPrompt } from '@/components/new-build-prompt'
 import { usePremium } from '@/hooks/use-premium'
 import { I18nProvider, useI18n } from '@/i18n'
 import { logout } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { toast } from '@/lib/toast'
 import { ThemeProvider } from '@/theme'
 import KeysPage from '@/pages/KeysPage'
@@ -121,16 +122,43 @@ const navMenus: Record<
 
 const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform)
 
-function NavItem({ to, children }: { to: string; children: React.ReactNode }) {
+function SideLink({ to, index, children }: { to: string; index: string; children: React.ReactNode }) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `relative text-sm px-1 py-4 transition-colors ${
-          isActive
-            ? 'text-foreground after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-foreground'
-            : 'text-muted-foreground hover:text-foreground'
-        }`
+        cn(
+          'group relative flex items-baseline gap-3 py-1.5 pl-3 text-[0.95rem] transition-colors',
+          isActive ? 'font-medium text-foreground' : 'text-muted-foreground hover:text-foreground',
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <span
+            aria-hidden="true"
+            className={cn(
+              'absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 transition-colors',
+              isActive ? 'bg-brand' : 'bg-transparent group-hover:bg-border',
+            )}
+          />
+          <span className="eyebrow w-5 shrink-0 tabular-nums">{index}</span>
+          {children}
+        </>
+      )}
+    </NavLink>
+  )
+}
+
+function SubLink({ to, children }: { to: string; children: React.ReactNode }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          'block py-1 pl-11 text-[0.8125rem] transition-colors',
+          isActive ? 'font-medium text-foreground' : 'text-muted-foreground hover:text-foreground',
+        )
       }
     >
       {children}
@@ -140,9 +168,12 @@ function NavItem({ to, children }: { to: string; children: React.ReactNode }) {
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-70">
-      <span className="inline-block size-2 rounded-full bg-foreground" />
-      <span className="font-semibold tracking-tight text-sm">Free Rotation LLM Provider</span>
+    <Link to="/" className="block transition-opacity hover:opacity-75">
+      <span className="font-heading text-[1.4rem] leading-[1.05] tracking-tight">
+        Free Rotation
+        <br />
+        LLM Provider
+      </span>
     </Link>
   )
 }
@@ -254,150 +285,131 @@ function Navbar() {
   const { data: premium, licensed, isLoading: premiumLoading, isError: premiumError } = usePremium()
   const showUpgrade = Boolean(premium) && !licensed && !premiumLoading && !premiumError
 
+  const accountItems = (
+    <AccountMenuItems
+      showUpgrade={showUpgrade}
+      upgradeLabel={t('nav.upgrade')}
+      settingsLabel={t('nav.settings')}
+      updatesLabel={t('settings.checkForUpdates')}
+      signOutLabel={t('nav.signOut')}
+      changeEmailLabel={t('auth.changeEmail')}
+      changePasswordLabel={t('auth.changePassword')}
+      onUpgrade={() => navigate('/premium')}
+      onOpenSettings={() => setSettingsOpen(true)}
+      onOpenUpdates={() => setUpdatesOpen(true)}
+      onChangeEmail={() => setCredentialsMode('email')}
+      onChangePassword={() => setCredentialsMode('password')}
+    />
+  )
+  const noDrag = isDesktopApp ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined
+
   return (
     <>
-      <header
-        // In macOS desktop shell the window carries vibrancy blur, so a lighter wash (45%)
-        // lets it read as glass. Everywhere else (Windows/Linux/browser), use solid wash (80%)
-        // so text and contrast stay sharp and readable.
-        className={`sticky top-0 z-40 border-b backdrop-blur ${isMacDesktop ? 'bg-background/45' : 'bg-background/80'}`}
+      {/* Desktop and tablet: a fixed sidebar. The sub-pages of a section open
+          under it while the section is active, so nothing hides in a dropdown. */}
+      <aside
+        className="hidden shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground md:sticky md:top-0 md:flex md:h-dvh md:w-64"
         style={isDesktopApp ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
       >
-        <div
-          // Physical pl: reserves macOS traffic lights only on macOS. On Windows and Linux,
-          // standard window controls sit on the top-right, so no left padding is needed.
-          className={`mx-auto flex max-w-6xl items-center px-4 sm:px-6 ${isMacDesktop ? 'pl-20 sm:pl-20' : ''}`}
-          style={isMacDesktop ? { minHeight: 52 } : undefined}
-        >
+        <div className={cn('px-6 pb-8 pt-9', isMacDesktop && 'pt-14')}>
           <Brand />
-          <nav
-            className="ms-10 hidden items-center gap-6 md:flex"
-            style={isDesktopApp ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
-          >
-            {navItems.map((item) => {
-              const menu = navMenus[item.to]
-              return menu ? (
-                // Split control: the label navigates, the chevron reveals the
-                // pages hiding behind it.
-                <div key={item.to} className="flex items-center gap-0.5">
-                  <NavItem to={item.to}>{t(item.labelKey)}</NavItem>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      aria-label={t(menu.ariaKey)}
-                      className="rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      <ChevronDown className="size-3.5" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-44">
-                      {menu.items.map((entry) => (
-                        <DropdownMenuItem key={entry.to} onClick={() => navigate(entry.to)}>
-                          {t(entry.labelKey)}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              ) : (
-                <NavItem key={item.to} to={item.to}>
+        </div>
+        <nav className="flex-1 overflow-y-auto px-3 pb-4" style={noDrag}>
+          {navItems.map((item, index) => {
+            const menu = navMenus[item.to]
+            const open = menu?.isActive(location.pathname)
+            return (
+              <div key={item.to}>
+                <SideLink to={item.to} index={String(index + 1).padStart(2, '0')}>
                   {t(item.labelKey)}
-                </NavItem>
-              )
-            })}
-          </nav>
-          <div
-            className="ms-auto hidden items-center gap-1 md:flex"
-            style={isDesktopApp ? ({ WebkitAppRegion: 'no-drag' } as React.CSSProperties) : undefined}
+                </SideLink>
+                {menu && open && (
+                  <div className="mb-1">
+                    {menu.items.map((entry) => (
+                      <SubLink key={entry.to} to={entry.to}>
+                        {t(entry.labelKey)}
+                      </SubLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </nav>
+        <div className="space-y-0.5 border-t p-3" style={noDrag}>
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            aria-label={t('palette.title')}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            <button
-              type="button"
-              onClick={openCommandPalette}
-              aria-label={t('palette.title')}
-              className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+            <Search className="size-3.5" />
+            <span className="flex-1">{t('palette.title')}</span>
+            <kbd className="eyebrow">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label={t('nav.openMenu')}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Search className="size-3.5" />
-              <kbd className="text-[10px] text-muted-foreground">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
-            </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={buttonVariants({ variant: 'ghost', size: 'icon' })}
-                aria-label={t('nav.openMenu')}
-              >
-                <MoreHorizontal />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <AccountMenuItems
-                  showUpgrade={showUpgrade}
-                  upgradeLabel={t('nav.upgrade')}
-                  settingsLabel={t('nav.settings')}
-                  updatesLabel={t('settings.checkForUpdates')}
-                  signOutLabel={t('nav.signOut')}
-                  changeEmailLabel={t('auth.changeEmail')}
-                  changePasswordLabel={t('auth.changePassword')}
-                  onUpgrade={() => navigate('/premium')}
-                  onOpenSettings={() => setSettingsOpen(true)}
-                  onOpenUpdates={() => setUpdatesOpen(true)}
-                  onChangeEmail={() => setCredentialsMode('email')}
-                  onChangePassword={() => setCredentialsMode('password')}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="ms-auto md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={buttonVariants({ variant: 'ghost', size: 'icon' })}
-                aria-label={t('nav.openMenu')}
-              >
-                <Menu />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuGroup>
-                  {navItems.map((item) => {
-                    const menu = navMenus[item.to]
-                    return menu ? (
-                      <DropdownMenuSub key={item.to}>
-                        <DropdownMenuSubTrigger
-                          className={menu.isActive(location.pathname) ? 'bg-accent text-accent-foreground font-medium' : undefined}
-                        >
-                          {t(item.labelKey)}
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent>
-                          {menu.items.map((entry) => (
-                            <DropdownMenuItem key={entry.to} onClick={() => navigate(entry.to)}>
-                              {t(entry.labelKey)}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                    ) : (
-                      <DropdownMenuItem
-                        key={item.to}
-                        onClick={() => navigate(item.to)}
-                        className={location.pathname === item.to ? 'bg-accent text-accent-foreground font-medium' : undefined}
+              <Settings className="size-3.5" />
+              <span className="flex-1">{t('nav.settings')}</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              {accountItems}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </aside>
+
+      {/* Phones: a slim top bar with the brand and the same sections in a menu. */}
+      <header
+        className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/90 px-4 py-3 backdrop-blur md:hidden"
+        style={isDesktopApp ? ({ WebkitAppRegion: 'drag' } as React.CSSProperties) : undefined}
+      >
+        <Brand />
+        <div style={noDrag}>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={buttonVariants({ variant: 'ghost', size: 'icon' })}
+              aria-label={t('nav.openMenu')}
+            >
+              <Menu />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuGroup>
+                {navItems.map((item) => {
+                  const menu = navMenus[item.to]
+                  return menu ? (
+                    <DropdownMenuSub key={item.to}>
+                      <DropdownMenuSubTrigger
+                        className={menu.isActive(location.pathname) ? 'bg-accent text-accent-foreground font-medium' : undefined}
                       >
                         {t(item.labelKey)}
-                      </DropdownMenuItem>
-                    )
-                  })}
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <AccountMenuItems
-                  showUpgrade={showUpgrade}
-                  upgradeLabel={t('nav.upgrade')}
-                  settingsLabel={t('nav.settings')}
-                  updatesLabel={t('settings.checkForUpdates')}
-                  signOutLabel={t('nav.signOut')}
-                  changeEmailLabel={t('auth.changeEmail')}
-                  changePasswordLabel={t('auth.changePassword')}
-                  onUpgrade={() => navigate('/premium')}
-                  onOpenSettings={() => setSettingsOpen(true)}
-                  onOpenUpdates={() => setUpdatesOpen(true)}
-                  onChangeEmail={() => setCredentialsMode('email')}
-                  onChangePassword={() => setCredentialsMode('password')}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        {menu.items.map((entry) => (
+                          <DropdownMenuItem key={entry.to} onClick={() => navigate(entry.to)}>
+                            {t(entry.labelKey)}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  ) : (
+                    <DropdownMenuItem
+                      key={item.to}
+                      onClick={() => navigate(item.to)}
+                      className={location.pathname === item.to ? 'bg-accent text-accent-foreground font-medium' : undefined}
+                    >
+                      {t(item.labelKey)}
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              {accountItems}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
@@ -440,7 +452,7 @@ function PageContainer({ children }: { children: ReactNode }) {
   const location = useLocation()
   const fullBleed = FULL_BLEED_ROUTES.has(location.pathname)
   return (
-    <main className={fullBleed ? 'flex min-h-0 flex-1 flex-col' : 'mx-auto w-full max-w-6xl px-6 py-8'}>
+    <main className={fullBleed ? 'flex min-h-0 flex-1 flex-col' : 'mx-auto w-full max-w-6xl px-6 py-10 md:px-12 md:py-12'}>
       {children}
     </main>
   )
@@ -455,7 +467,7 @@ function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation()
   const fullBleed = FULL_BLEED_ROUTES.has(location.pathname)
   return (
-    <div className={`flex flex-col ${fullBleed ? 'h-dvh overflow-hidden' : 'min-h-screen'} ${isMacDesktop ? 'desktop-backdrop' : ''}`}>
+    <div className={`flex flex-col md:flex-row ${fullBleed ? 'h-dvh overflow-hidden' : 'min-h-screen'} ${isMacDesktop ? 'desktop-backdrop' : ''}`}>
       {children}
     </div>
   )
@@ -474,6 +486,8 @@ function App() {
                   flow, and a padded route stretches to nothing it can show. */}
               <AppShell>
                 <Navbar />
+                {/* The content column: everything right of the sidebar. */}
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                 <PageContainer>
                   <PageBoundary>
                     <Routes>
@@ -506,6 +520,7 @@ function App() {
                     </Routes>
                   </PageBoundary>
                 </PageContainer>
+                </div>
                 <Toaster />
                 <CommandPalette />
                 <UpdateReminder />

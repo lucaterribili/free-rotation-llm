@@ -1,9 +1,9 @@
 import { cn } from '@/lib/utils'
 
-// The dashboard's one segmented-control idiom (pill bar with a solid active
-// segment), shared by the Keys tabs and the Analytics range toggle. ModelsTabs
-// renders the same visual with NavLinks for routed tabs. On a narrow screen
-// the bar scrolls sideways instead of widening the page.
+// The dashboard's one tab idiom: text tabs on a hairline, the active one marked
+// by an ink underline. Shared by the Keys tabs and the Analytics range toggle;
+// ModelsTabs renders the same look with NavLinks for routed tabs. On a narrow
+// screen the row scrolls sideways instead of widening the page.
 export interface SegmentOption<T extends string> {
   value: T
   label: string
@@ -23,7 +23,7 @@ export function SegmentedControl<T extends string>({
   className?: string
 }) {
   return (
-    <div role="tablist" aria-label={ariaLabel} className={cn('inline-flex max-w-full gap-1 overflow-x-auto rounded-xl border p-1 [&>button]:shrink-0', className)}>
+    <div role="tablist" aria-label={ariaLabel} className={cn('flex max-w-full gap-5 overflow-x-auto border-b [&>button]:shrink-0', className)}>
       {options.map(o => (
         <button
           key={o.value}
@@ -31,10 +31,10 @@ export function SegmentedControl<T extends string>({
           role="tab"
           aria-selected={value === o.value}
           onClick={() => onValueChange(o.value)}
-          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-colors ${
+          className={`-mb-px inline-flex items-center gap-1.5 border-b-2 px-0.5 pb-2.5 pt-1 text-sm transition-colors ${
             value === o.value
-              ? 'bg-foreground text-background font-medium'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              ? 'border-foreground font-medium text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           {o.label}

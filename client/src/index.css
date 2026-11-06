@@ -3,11 +3,12 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/fraunces/opsz.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
+    --font-heading: 'Fraunces Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
     --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
     --color-sidebar-ring: var(--sidebar-ring);
@@ -24,6 +25,10 @@
     --color-chart-2: var(--chart-2);
     --color-chart-1: var(--chart-1);
     --color-ring: var(--ring);
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+    --color-ok: var(--ok);
+    --color-warn: var(--warn);
     --color-input: var(--input);
     --color-border: var(--border);
     --color-destructive: var(--destructive);
@@ -53,77 +58,82 @@
 }
 
 :root {
-    /* Light: cool tech paper with the same violet/cyan accents as dark. */
-    --background: oklch(0.985 0.006 275);
-    --foreground: oklch(0.2 0.03 275);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.2 0.03 275);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.2 0.03 275);
-    --primary: oklch(0.52 0.22 283);
-    --primary-foreground: oklch(0.99 0.005 283);
-    --secondary: oklch(0.965 0.012 275);
-    --secondary-foreground: oklch(0.26 0.05 280);
-    --muted: oklch(0.965 0.01 275);
-    --muted-foreground: oklch(0.5 0.03 275);
-    --accent: oklch(0.955 0.025 285);
-    --accent-foreground: oklch(0.3 0.12 283);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.91 0.015 275);
-    --input: oklch(0.91 0.015 275);
-    --ring: oklch(0.6 0.2 283);
-    --chart-1: oklch(0.55 0.22 283);
-    --chart-2: oklch(0.62 0.14 215);
-    --chart-3: oklch(0.6 0.22 330);
-    --chart-4: oklch(0.58 0.17 255);
-    --chart-5: oklch(0.7 0.13 185);
-    --radius: 0.5rem;
-    --sidebar: oklch(0.975 0.01 275);
-    --sidebar-foreground: oklch(0.2 0.03 275);
-    --sidebar-primary: oklch(0.52 0.22 283);
-    --sidebar-primary-foreground: oklch(0.99 0.005 283);
-    --sidebar-accent: oklch(0.945 0.03 285);
-    --sidebar-accent-foreground: oklch(0.3 0.12 283);
-    --sidebar-border: oklch(0.91 0.015 275);
-    --sidebar-ring: oklch(0.6 0.2 283);
-    --glow: oklch(0.6 0.22 283 / 0.35);
+    /* Editorial light: warm paper, ink text, one vermilion accent. */
+    --background: oklch(0.968 0.014 85);
+    --foreground: oklch(0.2 0.02 60);
+    --card: oklch(0.985 0.008 85);
+    --card-foreground: oklch(0.2 0.02 60);
+    --popover: oklch(0.99 0.006 85);
+    --popover-foreground: oklch(0.2 0.02 60);
+    --primary: oklch(0.22 0.02 60);
+    --primary-foreground: oklch(0.97 0.012 85);
+    --secondary: oklch(0.935 0.018 82);
+    --secondary-foreground: oklch(0.22 0.02 60);
+    --muted: oklch(0.945 0.016 83);
+    --muted-foreground: oklch(0.47 0.02 70);
+    --accent: oklch(0.93 0.032 62);
+    --accent-foreground: oklch(0.22 0.02 60);
+    --destructive: oklch(0.52 0.19 28);
+    --border: oklch(0.86 0.02 80);
+    --input: oklch(0.84 0.02 80);
+    --ring: oklch(0.6 0.17 40);
+    --brand: oklch(0.58 0.18 38);
+    --brand-foreground: oklch(0.985 0.008 85);
+    --ok: oklch(0.48 0.1 155);
+    --warn: oklch(0.66 0.13 75);
+    --chart-1: oklch(0.58 0.18 38);
+    --chart-2: oklch(0.45 0.09 160);
+    --chart-3: oklch(0.72 0.13 80);
+    --chart-4: oklch(0.45 0.07 250);
+    --chart-5: oklch(0.45 0.1 340);
+    --radius: 0.1875rem;
+    --sidebar: oklch(0.948 0.018 83);
+    --sidebar-foreground: oklch(0.2 0.02 60);
+    --sidebar-primary: oklch(0.22 0.02 60);
+    --sidebar-primary-foreground: oklch(0.97 0.012 85);
+    --sidebar-accent: oklch(0.925 0.03 65);
+    --sidebar-accent-foreground: oklch(0.22 0.02 60);
+    --sidebar-border: oklch(0.86 0.02 80);
+    --sidebar-ring: oklch(0.6 0.17 40);
 }
 
 .dark {
-    /* Dark neon: deep indigo-black, violet primary, cyan/magenta accents. */
-    --background: oklch(0.125 0.03 278);
-    --foreground: oklch(0.97 0.01 275);
-    --card: oklch(0.165 0.035 278);
-    --card-foreground: oklch(0.97 0.01 275);
-    --popover: oklch(0.175 0.04 278);
-    --popover-foreground: oklch(0.97 0.01 275);
-    --primary: oklch(0.74 0.19 288);
-    --primary-foreground: oklch(0.15 0.04 280);
-    --secondary: oklch(0.23 0.045 278);
-    --secondary-foreground: oklch(0.97 0.01 275);
-    --muted: oklch(0.21 0.04 278);
-    --muted-foreground: oklch(0.7 0.04 275);
-    --accent: oklch(0.26 0.07 285);
-    --accent-foreground: oklch(0.96 0.03 285);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(0.75 0.1 285 / 16%);
-    --input: oklch(0.75 0.1 285 / 20%);
-    --ring: oklch(0.74 0.19 288);
-    --chart-1: oklch(0.76 0.18 290);
-    --chart-2: oklch(0.82 0.14 205);
-    --chart-3: oklch(0.74 0.22 335);
-    --chart-4: oklch(0.72 0.16 255);
-    --chart-5: oklch(0.8 0.15 175);
-    --sidebar: oklch(0.15 0.035 278);
-    --sidebar-foreground: oklch(0.97 0.01 275);
-    --sidebar-primary: oklch(0.74 0.19 288);
-    --sidebar-primary-foreground: oklch(0.15 0.04 280);
-    --sidebar-accent: oklch(0.26 0.07 285);
-    --sidebar-accent-foreground: oklch(0.96 0.03 285);
-    --sidebar-border: oklch(0.75 0.1 285 / 16%);
-    --sidebar-ring: oklch(0.74 0.19 288);
-    --glow: oklch(0.74 0.19 288 / 0.55);
-    --glow-cyan: oklch(0.82 0.14 205 / 0.5);
+    /* Editorial dark: warm black "ink" paper, same accent. */
+    --background: oklch(0.19 0.012 60);
+    --foreground: oklch(0.93 0.015 85);
+    --card: oklch(0.225 0.014 60);
+    --card-foreground: oklch(0.93 0.015 85);
+    --popover: oklch(0.235 0.014 60);
+    --popover-foreground: oklch(0.93 0.015 85);
+    --primary: oklch(0.93 0.015 85);
+    --primary-foreground: oklch(0.2 0.02 60);
+    --secondary: oklch(0.27 0.016 60);
+    --secondary-foreground: oklch(0.93 0.015 85);
+    --muted: oklch(0.25 0.014 60);
+    --muted-foreground: oklch(0.7 0.02 80);
+    --accent: oklch(0.3 0.04 55);
+    --accent-foreground: oklch(0.95 0.015 85);
+    --destructive: oklch(0.7 0.17 25);
+    --border: oklch(0.95 0.02 85 / 14%);
+    --input: oklch(0.95 0.02 85 / 18%);
+    --ring: oklch(0.72 0.16 45);
+    --brand: oklch(0.72 0.16 45);
+    --brand-foreground: oklch(0.2 0.02 60);
+    --ok: oklch(0.74 0.12 155);
+    --warn: oklch(0.8 0.13 80);
+    --chart-1: oklch(0.72 0.16 45);
+    --chart-2: oklch(0.74 0.12 160);
+    --chart-3: oklch(0.82 0.13 85);
+    --chart-4: oklch(0.72 0.09 250);
+    --chart-5: oklch(0.74 0.11 340);
+    --sidebar: oklch(0.165 0.012 60);
+    --sidebar-foreground: oklch(0.93 0.015 85);
+    --sidebar-primary: oklch(0.93 0.015 85);
+    --sidebar-primary-foreground: oklch(0.2 0.02 60);
+    --sidebar-accent: oklch(0.27 0.04 55);
+    --sidebar-accent-foreground: oklch(0.95 0.015 85);
+    --sidebar-border: oklch(0.95 0.02 85 / 14%);
+    --sidebar-ring: oklch(0.72 0.16 45);
 }
 
 @layer base {
@@ -166,52 +176,43 @@
     }
 }
 
-/* ── Futuristic layer ───────────────────────────────────────────────────────
-   Pure decoration on top of the tokens above: an aurora backdrop with a faint
-   grid, luminous focus rings, and a soft glow on primary actions and active
-   switches. Everything is theme-token driven and disabled for reduced-motion
-   where it animates. */
-.dark body {
-    background-image:
-        radial-gradient(60rem 36rem at 12% -8%, oklch(0.55 0.24 288 / 0.38), transparent 60%),
-        radial-gradient(48rem 30rem at 95% 8%, oklch(0.72 0.15 205 / 0.24), transparent 60%),
-        radial-gradient(40rem 28rem at 60% 110%, oklch(0.64 0.24 335 / 0.2), transparent 60%),
-        linear-gradient(oklch(0.8 0.1 285 / 0.045) 1px, transparent 1px),
-        linear-gradient(90deg, oklch(0.8 0.1 285 / 0.045) 1px, transparent 1px);
-    background-size: auto, auto, auto, 44px 44px, 44px 44px;
-    background-attachment: fixed;
+/* ── Editorial layer ────────────────────────────────────────────────────────
+   Serif display type, mono small-caps labels, hairline rules instead of
+   shadows, and a faint paper grain. All of it rides on the tokens above. */
+h1, h2 {
+    font-family: var(--font-heading);
+    font-optical-sizing: auto;
+    font-weight: 500;
+    letter-spacing: -0.015em;
 }
-:root:not(.dark) body {
-    background-image:
-        radial-gradient(52rem 32rem at 8% -10%, oklch(0.76 0.16 285 / 0.34), transparent 62%),
-        radial-gradient(44rem 28rem at 100% 0%, oklch(0.8 0.13 205 / 0.28), transparent 62%),
-        radial-gradient(36rem 24rem at 55% 112%, oklch(0.8 0.15 335 / 0.18), transparent 62%),
-        linear-gradient(oklch(0.5 0.1 285 / 0.045) 1px, transparent 1px),
-        linear-gradient(90deg, oklch(0.5 0.1 285 / 0.045) 1px, transparent 1px);
-    background-size: auto, auto, auto, 44px 44px, 44px 44px;
-    background-attachment: fixed;
+body {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.3  0 0 0 0 0.25  0 0 0 0 0.2  0 0 0 .5 0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.06'/></svg>");
 }
+.dark body { background-image: none; }
 html.desktop.desktop-mac body { background-image: none; }
 
-::selection { background: oklch(0.74 0.19 288 / 0.35); }
+::selection { background: color-mix(in oklab, var(--brand) 30%, transparent); }
 
-/* Luminous focus ring on form controls and buttons. */
-:where(input, textarea, select, button, [role="switch"], [role="tab"]):focus-visible {
-    box-shadow: 0 0 0 3px var(--glow);
+/* Small mono caps used for eyebrows, column heads and counters. */
+.eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+}
+/* The newspaper rule: a heavy line over a section. */
+.rule-heavy { border-top: 2px solid var(--foreground); }
+
+/* Focus is the accent, drawn as a crisp outline (no soft glow). */
+:where(input, textarea, select, button, a, [role="switch"], [role="tab"]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
 }
 
-/* Primary actions and the "on" state of switches get a soft halo. */
-[data-slot="button"].bg-primary { box-shadow: 0 0 18px -4px var(--glow); }
-[data-slot="button"].bg-primary:hover { box-shadow: 0 0 26px -2px var(--glow); }
-[data-slot="switch"][data-state="checked"] { box-shadow: 0 0 12px -2px var(--glow); }
-
-/* Cards: a hairline of light along the top edge in dark. */
-.dark [data-slot="card"] {
-    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.06), 0 8px 30px -12px oklch(0 0 0 / 0.6);
-}
-
-/* Slim, tinted scrollbars. */
-* { scrollbar-width: thin; scrollbar-color: oklch(0.6 0.12 285 / 0.45) transparent; }
+/* Thin, quiet scrollbars. */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--foreground) 28%, transparent) transparent; }
 
 /* ── Syntax highlighting (highlight.js spans, see lib/highlight.ts) ─────────
    One restrained palette per theme: keywords and tags carry the accent,

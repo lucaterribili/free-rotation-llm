@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom'
 import { useI18n } from '@/i18n'
 
-// Segmented modality switcher shared by the Models pages.
+// Modality tabs shared by the Models pages. From md up the sidebar already lists
+// these pages under "Models", so the tabs only show on phones.
 // Industry-standard layout: one "Models" section, modality as a tab — chat
 // routing (cross-model fallback), embeddings routing (same-model,
 // cross-provider fallback), and fusion (multi-model synthesis) are different
@@ -9,11 +10,11 @@ import { useI18n } from '@/i18n'
 export function ModelsTabs() {
   const { t } = useI18n()
   const tab = (isActive: boolean) =>
-    `inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-colors ${
-      isActive ? 'bg-foreground text-background font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+    `-mb-px inline-flex items-center gap-1.5 border-b-2 px-0.5 pb-2.5 pt-1 text-sm transition-colors ${
+      isActive ? 'border-foreground font-medium text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
     }`
   return (
-    <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-xl border p-1 [&>a]:shrink-0">
+    <div className="flex max-w-full gap-5 overflow-x-auto border-b md:hidden [&>a]:shrink-0">
       <NavLink to="/models/chat" className={({ isActive }) => tab(isActive)}>{t('models.chatModelsTab')}</NavLink>
       <NavLink to="/models/image" className={({ isActive }) => tab(isActive)}>{t('models.imageTab')}</NavLink>
       <NavLink to="/models/video" className={({ isActive }) => tab(isActive)}>{t('models.videoTab')}</NavLink>
