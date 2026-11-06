@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -22,6 +22,7 @@ import type { ApiKey, ApiKeyModel } from '../../../../shared/types'
 import { formatSqliteUtcToLocalTime } from '@/lib/utils'
 import { useI18n } from '@/i18n'
 import { toast } from '@/lib/toast'
+import { platformColors } from '@/lib/routing'
 import { keyMatchesQuery } from '@/lib/key-search'
 import { copyText } from '@/lib/clipboard'
 import {
@@ -454,7 +455,7 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
       {visibleGroups.length === 0 ? (
         <EmptyState title={t('keys.noFilterMatch')} />
       ) : (
-        <div className="space-y-4">
+        <div className="grid items-start gap-3 md:grid-cols-2">
           {visibleGroups.map((group, i) => {
             const expanded = isGroupExpanded(group)
             // Section headings appear only when search keys are on screen;
@@ -467,16 +468,17 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
             // visible, so the rest of the selection can be built without hunting.
             const groupHasSelection = group.keys.some(k => selectedKeyIds.has(k.id))
             return (
-              <div key={group.value}>
+              <Fragment key={group.value}>
                 {sectionStart && (
-                  <div className={`pb-2 ${i === 0 ? '' : 'pt-4'}`}>
+                  <div className={`md:col-span-2 pb-1 ${i === 0 ? '' : 'pt-4'}`}>
                     <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       {group.search ? t('search.keysSection') : t('search.keysModelsSection')}
                     </h2>
                     {group.search && <p className="text-xs text-muted-foreground">{t('search.keysSectionHint')}</p>}
                   </div>
                 )}
-                <div className="flex items-center gap-2 pb-2">
+                <div className={`overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-sm ${expanded ? 'md:col-span-2' : ''}`}>
+                <div className="flex items-center gap-3 p-3.5">
                   <Switch
                     checked={group.keys.some(k => k.enabled)}
                     onCheckedChange={(checked) =>
@@ -490,7 +492,14 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
                     className="flex min-w-0 flex-1 items-center gap-2 text-left"
                     aria-expanded={expanded}
                   >
-                    <h3 className="text-sm font-medium">{group.label}</h3>
+                    <span
+                      aria-hidden="true"
+                      className="flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold text-white"
+                      style={{ backgroundColor: platformColors[group.platform] ?? 'var(--muted-foreground)' }}
+                    >
+                      {group.label.trim().charAt(0).toUpperCase()}
+                    </span>
+                    <h3 className="truncate text-sm font-semibold">{group.label}</h3>
                     {group.search && (
                       <Badge variant="outline" className="border-sky-600/30 text-[10px] text-sky-700 dark:text-sky-300">
                         {t('search.badge')}
@@ -504,7 +513,7 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
                         </code>
                       </Tooltip>
                     )}
-                    <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs text-muted-foreground">
                       {healthyCount > 0 && (
                         <span className="inline-flex items-center gap-1">
                           <span className="size-1.5 rounded-full bg-emerald-500" />
@@ -590,7 +599,7 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
                     clearGroup()
                   }
                   return (
-                    <div className="mb-2 flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-1.5 text-xs">
+                    <div className="mx-3.5 mb-3 flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-1.5 text-xs">
                       <span className="text-muted-foreground">{t('keys.bulkSelected', { count: groupSelected.length })}</span>
                       <Button size="xs" variant="outline" disabled={bulkKeys.isPending} onClick={() => bulk('enable')}>
                         {t('keys.bulkEnable')}
@@ -619,7 +628,7 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
                 })()}
 
                 {expanded && (
-                  <div className="rounded-2xl border divide-y bg-card overflow-hidden">
+                  <div className="divide-y border-t bg-card">
                     {group.keys.map(k => {
                       const status = statusOf(k)
                       const health = healthKeyMap.get(k.id)
@@ -991,7 +1000,8 @@ export function ProviderList({ onAddKey }: { onAddKey: () => void }) {
                     })}
                   </div>
                 )}
-              </div>
+                </div>
+              </Fragment>
             )
           })}
         </div>
